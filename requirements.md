@@ -62,6 +62,8 @@
 - History-Lane page files:
   - `historylane.html` (history-lane page structure)
   - `historylane.js` (history-lane page logic)
+- Testing:
+  - `test.html` (unit tests for all functionality)
 - Shared styling via `style.css` for consistent design
 
 ### Interfaces
@@ -75,8 +77,9 @@
 ### Versioning
 - Version number must be displayed on the website (bottom right, small font)
 - Version follows semantic versioning (e.g., v1.0.0, v1.1.0, v2.0.0)
-- Version number is stored in `script.js` as a constant
+- Version number is stored in both `script.js` and `historylane.js` as a constant
 - Version must be manually incremented with each commit that changes functionality or fixes bugs
+- **Both files must have the same version number**
 - Version increment guidelines:
   - **Patch** (v1.0.X): Bug fixes, minor text changes
   - **Minor** (v1.X.0): New features, design changes
@@ -143,8 +146,17 @@
 - Comments for important logic sections (e.g., parsing the Markdown table)
 
 ### Tests
-- Manual test in browser
-- Verification: GitHub fetch works, error case is handled, no immediate repetition
+- **Unit Tests**: `test.html` with comprehensive automated tests
+  - Markdown parsing tests
+  - Date filtering and sorting tests (History-Lane)
+  - Exact wording preservation tests
+  - Edge case handling (leap years, empty results)
+  - All tests must pass before deployment
+- **Manual Browser Tests**:
+  - Main page: GitHub fetch works, random selection, no immediate repetition
+  - History-Lane: Correct date filtering, descending sort, navigation
+  - Responsive design on mobile viewport
+  - Error handling (network failures)
 
 ### Documentation
 - README.md with deployment instructions (FTP upload)

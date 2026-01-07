@@ -10,7 +10,9 @@ Minimalistic static website that displays random wake-up questions from a GitHub
 
 ## Tech Stack
 
-- **Three files:** `index.html`, `style.css`, `script.js`
+- **Main page:** `index.html`, `style.css`, `script.js`
+- **History-Lane page:** `historylane.html`, `historylane.js` (shares `style.css`)
+- **Testing:** `test.html` (unit tests)
 - **Languages:** HTML5, CSS3, Vanilla JavaScript (ES6+)
 - **No frameworks, libraries, or build tools**
 - **Data source:** GitHub Raw API (parse Markdown table)
@@ -30,26 +32,41 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
 **CRITICAL: Run all tests before committing code changes**
 
 **When to test:**
-- ✅ **Required** when changing: `index.html`, `style.css`, `script.js`, or `test.html`
-- ❌ **Not required** when only changing: `requirements.md`, `CLAUDE.md`, `README.md`, or other documentation files
+- ✅ **Required** when changing: `index.html`, `style.css`, `script.js`, `historylane.html`, `historylane.js`, or `test.html`
+- ❌ **Not required** when only changing: `requirements.md`, `CLAUDE.md`, `README.md`, `IMPLEMENTATION_PLAN.md`, or other documentation files
 
 **Test checklist for code changes:**
-1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (12/12)
-2. **Manual Browser Tests**: Open `http://localhost:8000/` and verify:
+1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (22/22)
+   - 12 tests for main page functionality
+   - 10 tests for History-Lane functionality
+2. **Manual Browser Tests - Main Page**: Open `http://localhost:8000/` and verify:
    - Questions load correctly from GitHub
    - Random selection works (click button multiple times)
    - No same question appears twice in a row
    - Questions display in exact original wording (no translation)
-   - Version number displays in bottom right corner
+   - Version number displays v1.2.0 in bottom right corner
    - Page heading and all text elements are visible
+   - History-Lane link is visible and clickable
    - Responsive design works (test on mobile viewport)
    - Error handling works (temporarily break GitHub URL to test)
-3. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered
+3. **Manual Browser Tests - History-Lane**: Open `http://localhost:8000/historylane.html` and verify:
+   - Questions for current day/month are displayed
+   - Questions are sorted descending (newest first)
+   - Table is readable and well-styled (dark theme)
+   - Back link returns to index page
+   - Version number displays v1.2.0
+   - Exact wording preserved (no translation)
+   - Responsive design works on mobile
+4. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered on both pages
 
 **Never commit code changes without completing all tests above.**
 
 ### Deployment
-- FTP upload of the three files to web hosting
+- FTP upload of all files to web hosting:
+  - `index.html`, `historylane.html`
+  - `style.css`
+  - `script.js`, `historylane.js`
+  - `test.html` (optional, for testing)
 - No build steps required
 
 ### Code Style
