@@ -95,6 +95,11 @@
 5. **Button:** "Nächste Frage aus dem Archiv der Aufwachfrage."
 6. **Version number** (bottom right corner, very small font, e.g., "v1.0.0")
 
+### Links
+- All occurrences of "www.aufwachfrage.de" must be clickable links
+- Links should open https://www.aufwachfrage.de in a new tab
+- Links must be clearly recognizable as links (underlined)
+
 ### Typography
 - Minimalistic, easily readable
 - Sans-serif font

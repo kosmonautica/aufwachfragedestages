@@ -36,6 +36,11 @@ body {
     letter-spacing: -0.01em;
 }
 
+.page-heading a {
+    color: #aaaaaa;
+    text-decoration: underline;
+}
+
 /* Question section */
 .question-container {
     margin-bottom: 20px;
@@ -64,6 +69,11 @@ body {
     font-size: 0.85rem;
     color: #aaaaaa;
     font-weight: 300;
+}
+
+.attribution a {
+    color: #aaaaaa;
+    text-decoration: underline;
 }
 
 /* Button */
