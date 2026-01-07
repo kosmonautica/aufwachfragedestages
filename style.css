@@ -279,46 +279,18 @@ td:first-child {
     justify-content: center;
 }
 
-/* Date input wrapper with icon */
-.date-input-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
 .date-controls input[type="text"] {
     background-color: #2a2a2a;
     color: #ffffff;
     border: 1px solid #444444;
-    padding: 10px 16px 10px 40px;
+    padding: 10px 16px;
     font-size: 1rem;
     border-radius: 4px;
     font-family: inherit;
     text-align: center;
     transition: border-color 0.3s ease;
-    min-width: 150px;
-}
-
-/* Calendar icon button */
-.calendar-icon {
-    position: absolute;
-    left: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    background: none;
-    border: none;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 4px;
-    z-index: 1;
-    transition: transform 0.2s ease;
-}
-
-.calendar-icon:hover {
-    transform: translateY(-50%) scale(1.1);
-}
-
-.calendar-icon:active {
-    transform: translateY(-50%) scale(0.95);
+    min-width: 80px;
+    max-width: 100px;
 }
 
 .date-controls input[type="text"]::placeholder {
@@ -399,18 +371,14 @@ td:first-child {
 
     .date-controls input[type="text"] {
         font-size: 0.9rem;
-        padding: 8px 16px 8px 36px;
-        min-width: 130px;
+        padding: 8px 12px;
+        min-width: 70px;
+        max-width: 90px;
     }
 
     .date-controls .button {
         font-size: 0.9rem;
         padding: 8px 16px;
-    }
-
-    .calendar-icon {
-        font-size: 1rem;
-        left: 6px;
     }
 
     .date-navigation .nav-link {
@@ -434,19 +402,15 @@ td:first-child {
 
     .date-controls input[type="text"] {
         font-size: 0.85rem;
-        padding: 8px 14px 8px 34px;
-        min-width: 140px;
+        padding: 8px 12px;
+        min-width: 70px;
+        max-width: 90px;
     }
 
     .date-controls .button {
         font-size: 0.85rem;
         padding: 8px 14px;
         width: 100%;
-    }
-
-    .calendar-icon {
-        font-size: 0.9rem;
-        left: 6px;
     }
 
     .date-navigation {

@@ -11,15 +11,13 @@ const tableContainer = document.getElementById('tableContainer');
 const tableBody = document.getElementById('tableBody');
 const versionElement = document.getElementById('version');
 const datePicker = document.getElementById('datePicker');
-const datePickerNative = document.getElementById('datePickerNative');
-const calendarIcon = document.getElementById('calendarIcon');
 const loadDateButton = document.getElementById('loadDateButton');
 const resetButton = document.getElementById('resetButton');
 const previousDay = document.getElementById('previousDay');
 const nextDay = document.getElementById('nextDay');
 
-// Track currently displayed date (as Date object)
-let currentDisplayedDate = new Date();
+// Track currently displayed day/month (as DD.MM string)
+let currentDisplayedDayMonth = getCurrentDayMonth();
 
 /**
  * Get current day and month in DD.MM format
@@ -32,38 +30,40 @@ function getCurrentDayMonth() {
 }
 
 /**
- * Convert Date object to DD.MM format
- * @param {Date} date - Date object
- * @returns {String} DD.MM format
+ * Increment day/month by one day
+ * @param {String} dayMonth - DD.MM format
+ * @returns {String} Next day in DD.MM format
  */
-function dateToDD_MM(date) {
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    return `${day}.${month}`;
+function incrementDay(dayMonth) {
+    const [day, month] = dayMonth.split('.').map(Number);
+    const currentYear = new Date().getFullYear(); // Use current year for calculation
+    const date = new Date(currentYear, month - 1, day);
+    date.setDate(date.getDate() + 1);
+    const newDay = String(date.getDate()).padStart(2, '0');
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+    return `${newDay}.${newMonth}`;
 }
 
 /**
- * Convert Date object to DD.MM.YYYY format (for date input field)
- * @param {Date} date - Date object
- * @returns {String} DD.MM.YYYY format
+ * Decrement day/month by one day
+ * @param {String} dayMonth - DD.MM format
+ * @returns {String} Previous day in DD.MM format
  */
-function dateToDD_MM_YYYY(date) {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${day}.${month}.${year}`;
+function decrementDay(dayMonth) {
+    const [day, month] = dayMonth.split('.').map(Number);
+    const currentYear = new Date().getFullYear(); // Use current year for calculation
+    const date = new Date(currentYear, month - 1, day);
+    date.setDate(date.getDate() - 1);
+    const newDay = String(date.getDate()).padStart(2, '0');
+    const newMonth = String(date.getMonth() + 1).padStart(2, '0');
+    return `${newDay}.${newMonth}`;
 }
 
 /**
- * Update date picker to show the current displayed date
+ * Update date picker to show the current displayed day/month
  */
 function updateDatePicker() {
-    datePicker.value = dateToDD_MM_YYYY(currentDisplayedDate);
-    // Also update native date picker
-    const year = currentDisplayedDate.getFullYear();
-    const month = String(currentDisplayedDate.getMonth() + 1).padStart(2, '0');
-    const day = String(currentDisplayedDate.getDate()).padStart(2, '0');
-    datePickerNative.value = `${year}-${month}-${day}`;
+    datePicker.value = currentDisplayedDayMonth;
 }
 
 /**
@@ -224,33 +224,26 @@ function showError(message) {
 
 /**
  * Main function to load History-Lane
- * @param {Date} targetDate - Optional Date object. If not provided, uses current date.
+ * @param {String} dayMonth - Optional day/month in DD.MM format. If not provided, uses current date.
  */
-async function loadHistoryLane(targetDate = null) {
+async function loadHistoryLane(dayMonth = null) {
     try {
         // Show loading, hide error and table
         loadingMessage.style.display = 'block';
         errorMessage.style.display = 'none';
         tableContainer.style.display = 'none';
 
-        // Update current displayed date
-        if (targetDate) {
-            currentDisplayedDate = new Date(targetDate);
-        } else {
-            currentDisplayedDate = new Date();
-        }
+        // Update current displayed day/month
+        currentDisplayedDayMonth = dayMonth || getCurrentDayMonth();
 
-        // Update date picker to reflect current displayed date
+        // Update date picker to reflect current displayed day/month
         updateDatePicker();
-
-        // Get day/month to filter by
-        const targetDayMonth = dateToDD_MM(currentDisplayedDate);
 
         // Fetch all questions
         const allQuestions = await fetchQuestions();
 
         // Filter by target day/month
-        const filteredQuestions = filterQuestionsByDayMonth(allQuestions, targetDayMonth);
+        const filteredQuestions = filterQuestionsByDayMonth(allQuestions, currentDisplayedDayMonth);
 
         // Sort descending
         const sortedQuestions = sortQuestionsDescending(filteredQuestions);
@@ -265,65 +258,55 @@ async function loadHistoryLane(targetDate = null) {
 
 // Event Listeners
 
-// Calendar icon click - open native date picker
-calendarIcon.addEventListener('click', () => {
-    datePickerNative.showPicker();
-});
-
-// Native date picker change - update text field
-datePickerNative.addEventListener('change', () => {
-    if (datePickerNative.value) {
-        const [year, month, day] = datePickerNative.value.split('-');
-        datePicker.value = `${day}.${month}.${year}`;
-        // Auto-load questions for selected date
-        const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-        loadHistoryLane(selectedDate);
-    }
-});
-
 // Load questions for selected date
 loadDateButton.addEventListener('click', () => {
     if (datePicker.value) {
-        // datePicker.value is in DD.MM.YYYY format
-        const [day, month, year] = datePicker.value.split('.');
+        // datePicker.value is in DD.MM format
+        const parts = datePicker.value.split('.');
 
         // Validate format
-        if (day && month && year && day.length === 2 && month.length === 2 && year.length === 4) {
-            const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        if (parts.length === 2 && parts[0].length === 2 && parts[1].length === 2) {
+            const day = parseInt(parts[0]);
+            const month = parseInt(parts[1]);
 
-            // Validate that the date is valid (handles invalid dates like 31.02.2024)
-            if (selectedDate.getDate() === parseInt(day) &&
-                selectedDate.getMonth() === parseInt(month) - 1 &&
-                selectedDate.getFullYear() === parseInt(year)) {
-                loadHistoryLane(selectedDate);
+            // Validate ranges
+            if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
+                // Use current year for validation
+                const currentYear = new Date().getFullYear();
+                const testDate = new Date(currentYear, month - 1, day);
+
+                // Validate that the date is valid (handles invalid dates like 31.02)
+                if (testDate.getDate() === day && testDate.getMonth() === month - 1) {
+                    loadHistoryLane(datePicker.value);
+                } else {
+                    alert('Ungültiges Datum. Bitte verwenden Sie das Format dd.mm');
+                }
             } else {
-                alert('Ungültiges Datum. Bitte verwenden Sie das Format dd.mm.yyyy');
+                alert('Ungültiges Datum. Tag muss zwischen 01-31 und Monat zwischen 01-12 sein.');
             }
         } else {
-            alert('Bitte verwenden Sie das Format dd.mm.yyyy');
+            alert('Bitte verwenden Sie das Format dd.mm');
         }
     }
 });
 
 // Reset to current date (today)
 resetButton.addEventListener('click', () => {
-    loadHistoryLane(new Date());
+    loadHistoryLane(getCurrentDayMonth());
 });
 
 // Navigate to previous day
 previousDay.addEventListener('click', (e) => {
     e.preventDefault();
-    const newDate = new Date(currentDisplayedDate);
-    newDate.setDate(newDate.getDate() - 1);
-    loadHistoryLane(newDate);
+    const newDayMonth = decrementDay(currentDisplayedDayMonth);
+    loadHistoryLane(newDayMonth);
 });
 
 // Navigate to next day
 nextDay.addEventListener('click', (e) => {
     e.preventDefault();
-    const newDate = new Date(currentDisplayedDate);
-    newDate.setDate(newDate.getDate() + 1);
-    loadHistoryLane(newDate);
+    const newDayMonth = incrementDay(currentDisplayedDayMonth);
+    loadHistoryLane(newDayMonth);
 });
 
 // Display version number

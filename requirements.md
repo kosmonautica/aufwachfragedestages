@@ -35,9 +35,7 @@
 - **Access:** Link at the bottom of the index page with text "Welche Aufwachfragen gab es am heutigen Datum in den letzten Jahren?"
 - **Inputs:**
   - Current date (automatic, client-side) - shown by default on page load
-  - Custom date selection via:
-    - Clickable calendar icon (📅) that opens native browser date picker
-    - Text input field in DD.MM.YYYY format (e.g., 07.01.2024) for manual entry
+  - Custom date selection via text input field in DD.MM format (e.g., 07.01) for manual entry
   - Button "Aktualisieren" to load questions for manually entered date
   - Button "Heute" to reset to today's date (always visible)
   - Navigation links "Früher" and "Später" to navigate day-by-day backward/forward with automatic refresh
@@ -50,9 +48,10 @@
   - Sorted in descending order (newest first)
   - Empty state message when no questions exist for selected date: "Für dieses Datum sind keine Aufwachfragen vorhanden."
 - **Validation:**
-  - Input field requires DD.MM.YYYY format (enforced by HTML pattern attribute)
-  - Invalid dates are detected and rejected (e.g., 31.02.2024)
+  - Input field requires DD.MM format (enforced by HTML pattern attribute)
+  - Invalid dates are detected and rejected (e.g., 31.02)
   - User receives error message if format is incorrect or date is invalid
+  - Year is not required as only day and month are relevant for filtering
 - **Navigation behavior:**
   - "Früher" decrements the displayed date by one day
   - "Später" increments the displayed date by one day
@@ -143,9 +142,8 @@
 2. **Date selection controls** (centered, below heading):
    - Label: "Datum auswählen:"
    - Date input row (horizontal layout on desktop, vertical on mobile):
-     - Clickable calendar icon (📅) that opens native date picker
-     - Text input field showing DD.MM.YYYY format (styled consistently with dark theme, auto-updates to show current displayed date, centered text)
-     - Placeholder: "dd.mm.yyyy"
+     - Text input field showing DD.MM format (styled consistently with dark theme, auto-updates to show current displayed date, centered text, compact width ~80-100px)
+     - Placeholder: "dd.mm"
      - Button: "Aktualisieren" (positioned right of input field)
      - Button: "Heute" (positioned right of Aktualisieren button, always visible)
    - Navigation links: "← Früher" and "Später →" (styled as links, positioned below date input row)
@@ -193,17 +191,17 @@
   - Main page: GitHub fetch works, random selection, no immediate repetition
   - History-Lane:
     - Default behavior: Shows current date questions on load
-    - Date picker field displays current date in DD.MM.YYYY format
-    - Date picker accepts manual input in DD.MM.YYYY format (e.g., 07.01.2024)
+    - Date picker field displays current date in DD.MM format (no year)
+    - Date picker accepts manual input in DD.MM format (e.g., 07.01)
     - Invalid date format shows error message
-    - Invalid dates (e.g., 31.02.2024) are rejected with error message
+    - Invalid dates (e.g., 31.02) are rejected with error message
     - Date picker field auto-updates when navigating or resetting
     - Custom date filtering works correctly
     - "Aktualisieren" button loads questions for selected date
     - "Heute" button is always visible and resets to current date
     - "Früher" link navigates backward one day with automatic refresh
     - "Später" link navigates forward one day with automatic refresh
-    - Navigation works across month boundaries (e.g., Jan 31 → Feb 1)
+    - Navigation works across month boundaries (e.g., 31.01 → 01.02)
     - Empty state message displays when no questions found
     - Descending sort maintained for all date selections
     - Navigation back to index page works

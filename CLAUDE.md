@@ -51,12 +51,9 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
    - Error handling works (temporarily break GitHub URL to test)
 3. **Manual Browser Tests - History-Lane**: Open `http://localhost:8000/historylane.html` and verify:
    - Default behavior: Questions for current day/month are displayed on load
-   - Date picker field shows current date in DD.MM.YYYY format on load
-   - Calendar icon (📅) is visible next to date field
-   - Click on calendar icon opens native date picker
-   - Select date in native picker converts to DD.MM.YYYY format and auto-loads questions
-   - Date picker input accepts manual input in DD.MM.YYYY format (e.g., 07.01.2024)
-   - Enter a custom date in DD.MM.YYYY format and click "Aktualisieren"
+   - Date picker field shows current date in DD.MM format on load (no year)
+   - Date picker input accepts manual input in DD.MM format (e.g., 07.01)
+   - Enter a custom date in DD.MM format and click "Aktualisieren"
    - Questions for selected date are displayed correctly
    - "Heute" button is always visible
    - Click "Heute" and verify it resets to current date
@@ -81,6 +78,7 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
 4. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered on both pages
 
 **Never commit code changes without completing all tests above.**
+Commit messages must not contain any hints about coding help by Claude Code or other LLMs.
 
 ### Deployment
 - FTP upload of all files to web hosting:

@@ -17,11 +17,7 @@
         <div class="date-controls">
             <label for="datePicker">Datum auswählen:</label>
             <div class="date-input-row">
-                <div class="date-input-wrapper">
-                    <button id="calendarIcon" class="calendar-icon" type="button" aria-label="Open calendar">📅</button>
-                    <input type="text" id="datePicker" placeholder="dd.mm.yyyy" pattern="\d{2}\.\d{2}\.\d{4}" />
-                    <input type="date" id="datePickerNative" style="display: none;" />
-                </div>
+                <input type="text" id="datePicker" placeholder="dd.mm" pattern="\d{2}\.\d{2}" />
                 <button id="loadDateButton" class="button">Aktualisieren</button>
                 <button id="resetButton" class="button secondary">Heute</button>
             </div>

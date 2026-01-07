@@ -16,15 +16,13 @@ Eine separate Seite zur Anzeige aller Fragen, die an einem bestimmten Tag (Tag +
 
 **Funktionen:**
 - Zeigt standardmäßig Fragen des aktuellen Datums
-- Datumsauswahl via:
-  - Klickbares Kalender-Icon (📅) für nativen Date Picker
-  - Manuelle Eingabe im Format DD.MM.YYYY
+- Datumsauswahl via manuelle Eingabe im Format DD.MM (Tag + Monat, ohne Jahr)
 - Navigation:
   - "Früher" / "Später" Links für tageweise Navigation
   - "Heute" Button zum Zurücksetzen auf aktuelles Datum
   - "Aktualisieren" Button zum Laden des gewählten Datums
 - Chronologische Sortierung (neueste zuerst)
-- Automatische Validierung ungültiger Datumsangaben
+- Automatische Validierung ungültiger Datumsangaben (z.B. 31.02)
 
 ## Tech Stack
 
