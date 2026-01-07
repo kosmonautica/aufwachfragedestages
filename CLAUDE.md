@@ -26,6 +26,23 @@ python3 -m http.server
 
 Manual browser testing required (see test cases in `requirements.md`, section 6).
 
+### Testing Before Commit
+**CRITICAL: Always run all tests before committing changes**
+
+1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (12/12)
+2. **Manual Browser Tests**: Open `http://localhost:8000/` and verify:
+   - Questions load correctly from GitHub
+   - Random selection works (click button multiple times)
+   - No same question appears twice in a row
+   - Questions display in exact original wording (no translation)
+   - Version number displays in bottom right corner
+   - Page heading and all text elements are visible
+   - Responsive design works (test on mobile viewport)
+   - Error handling works (temporarily break GitHub URL to test)
+3. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered
+
+**Never commit without completing all tests above.**
+
 ### Deployment
 - FTP upload of the three files to web hosting
 - No build steps required
