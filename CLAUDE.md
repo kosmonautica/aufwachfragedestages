@@ -57,6 +57,7 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
 ### AI Workflow Preferences
 - Use thinking mode only when explicitly requested for complex problem-solving
 - Keep responses concise and focused on the task at hand
+- Minimize response verbosity to save tokens (avoid unnecessary explanations or repetition)
 
 ## Requirements
 
