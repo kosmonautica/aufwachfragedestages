@@ -16,6 +16,7 @@
   - Date of the question (small font)
 - **Data source:** https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/main/README.md
 - **Data format:** Markdown table in README.md with columns: Date | Wake-Up Question | Thread on X/LinkedIn
+- **Important:** Questions must be displayed in their exact original wording without any translation or modification
 - **Error cases:**
   - GitHub not reachable: Display fallback message
   - Parsing error: Display user-friendly error message
@@ -26,6 +27,7 @@
 - **Inputs:** Button click
 - **Outputs:** New wake-up question with date
 - **Rule:** No repetition of the same question immediately in succession.
+- **Randomness:** Each button click must select a truly random question from the entire question catalog, ensuring diverse questions are shown.
 
 ## 3. Technical Requirements
 
