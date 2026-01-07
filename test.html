@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tests - Aufwachfrage</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-case {
+            margin: 15px 0;
+            padding: 10px;
+            border-left: 4px solid #ddd;
+        }
+        .test-case.pass {
+            border-left-color: #4caf50;
+            background: #f1f8f4;
+        }
+        .test-case.fail {
+            border-left-color: #f44336;
+            background: #fef1f0;
+        }
+        .test-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .test-message {
+            color: #666;
+            font-size: 0.9em;
+        }
+        .summary {
+            margin-top: 30px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .error-details {
+            color: #d32f2f;
+            font-size: 0.85em;
+            margin-top: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Unit Tests - Aufwachfrage</h1>
+        <div id="test-results"></div>
+        <div id="summary" class="summary"></div>
+    </div>
+
+    <script>
+        // Test framework
+        const results = [];
+
+        function assert(condition, testName, message) {
+            const passed = condition;
+            results.push({ passed, testName, message });
+
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-case ${passed ? 'pass' : 'fail'}`;
+            resultDiv.innerHTML = `
+                <div class="test-name">${passed ? '✓' : '✗'} ${testName}</div>
+                <div class="test-message">${message}</div>
+            `;
+            document.getElementById('test-results').appendChild(resultDiv);
+        }
+
+        function assertEquals(actual, expected, testName) {
+            const passed = actual === expected;
+            const message = passed
+                ? `Expected: ${expected}`
+                : `Expected: ${expected}, Got: ${actual}`;
+            assert(passed, testName, message);
+        }
+
+        function assertNotNull(value, testName) {
+            assert(value !== null && value !== undefined, testName,
+                value ? 'Value is defined' : 'Value is null/undefined');
+        }
+
+        function assertArrayLength(array, expectedLength, testName) {
+            const passed = Array.isArray(array) && array.length === expectedLength;
+            const message = passed
+                ? `Array has ${expectedLength} items`
+                : `Expected length ${expectedLength}, got ${array ? array.length : 'not an array'}`;
+            assert(passed, testName, message);
+        }
+
+        // Mock Markdown content for testing
+        const mockMarkdown = `# Aufwachfrage
+
+Some description text here.
+
+| Datum | Aufwachfrage | Thread on X/LinkedIn |
+|-------|--------------|---------------------|
+| 01.01.2024 | Was bedeutet Erfolg für dich? | [Link](https://example.com) |
+| 02.01.2024 | What is your biggest fear? | [Link](https://example.com) |
+| 03.01.2024 | Wie definierst du Glück? | [Link](https://example.com) |
+| 04.01.2024 | Can you be truly happy? | [Link](https://example.com) |
+
+More text here.`;
+
+        // Copy of parseMarkdownTable function from script.js for testing
+        function parseMarkdownTable(markdown) {
+            const questions = [];
+            const lines = markdown.split('\n');
+            let inTable = false;
+
+            for (let line of lines) {
+                if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
+                    if (line.includes('Datum') || line.includes('Date') || line.includes('Aufwachfrage')) {
+                        inTable = true;
+                        continue;
+                    }
+
+                    if (line.includes('---')) {
+                        continue;
+                    }
+
+                    if (inTable) {
+                        const columns = line.split('|')
+                            .map(col => col.trim())
+                            .filter(col => col !== '');
+
+                        if (columns.length >= 2) {
+                            const date = columns[0];
+                            const question = columns[1];
+
+                            if (date && question) {
+                                questions.push({ date, question });
+                            }
+                        }
+                    }
+                }
+            }
+
+            return questions;
+        }
+
+        // Run tests
+        function runTests() {
+            console.log('Running tests...');
+
+            // Test 1: Parse Markdown Table
+            const questions = parseMarkdownTable(mockMarkdown);
+            assertNotNull(questions, 'Parse Markdown: Returns array');
+            assertArrayLength(questions, 4, 'Parse Markdown: Correct number of questions');
+
+            // Test 2: Exact wording preservation (German)
+            const germanQuestion = questions.find(q => q.date === '01.01.2024');
+            assertNotNull(germanQuestion, 'Find German question by date');
+            assertEquals(
+                germanQuestion.question,
+                'Was bedeutet Erfolg für dich?',
+                'German question: Exact wording preserved'
+            );
+
+            // Test 3: Exact wording preservation (English)
+            const englishQuestion = questions.find(q => q.date === '02.01.2024');
+            assertNotNull(englishQuestion, 'Find English question by date');
+            assertEquals(
+                englishQuestion.question,
+                'What is your biggest fear?',
+                'English question: Exact wording preserved'
+            );
+
+            // Test 4: No translation occurred
+            const question3 = questions.find(q => q.date === '03.01.2024');
+            assert(
+                question3.question.includes('Glück') && !question3.question.includes('happiness'),
+                'German word "Glück" not translated',
+                'Verified German word remains in original language'
+            );
+
+            // Test 5: Date format preserved
+            assert(
+                questions.every(q => q.date.match(/\d{2}\.\d{2}\.\d{4}/)),
+                'Date format preservation',
+                'All dates maintain DD.MM.YYYY format'
+            );
+
+            // Test 6: No empty questions
+            assert(
+                questions.every(q => q.question.length > 0),
+                'No empty questions',
+                'All questions have content'
+            );
+
+            // Test 7: Special characters preserved
+            const specialCharQuestion = questions.find(q => q.question.includes('?'));
+            assertNotNull(specialCharQuestion, 'Special characters preserved');
+            assert(
+                questions.every(q => q.question.endsWith('?')),
+                'Question marks preserved',
+                'All questions end with "?"'
+            );
+
+            // Test 8: Mixed language support
+            const hasGerman = questions.some(q => /[äöüß]/.test(q.question));
+            const hasEnglish = questions.some(q => /^[A-Z]/.test(q.question) && !(/[äöüß]/.test(q.question)));
+            assert(
+                hasGerman && hasEnglish,
+                'Mixed language support',
+                'Both German and English questions detected'
+            );
+
+            // Test 9: Trimming works correctly
+            assert(
+                questions.every(q => q.question === q.question.trim()),
+                'Questions are trimmed',
+                'No leading/trailing whitespace'
+            );
+
+            // Test 10: Table structure validation
+            const testInvalidMarkdown = '| Only | One |\n| Column | Here |';
+            const invalidQuestions = parseMarkdownTable(testInvalidMarkdown);
+            assert(
+                invalidQuestions.length === 0,
+                'Invalid table structure handling',
+                'Parser correctly handles malformed tables'
+            );
+
+            // Test 11: Exact character preservation
+            const originalText = 'Was bedeutet Erfolg für dich?';
+            const parsedText = germanQuestion.question;
+            assert(
+                originalText === parsedText,
+                'Character-by-character comparison',
+                'Every character preserved exactly'
+            );
+
+            // Test 12: No encoding issues
+            assert(
+                questions.every(q => !q.question.includes('&uml;') && !q.question.includes('&#')),
+                'No HTML entity encoding',
+                'Special characters stored as plain text'
+            );
+
+            // Display summary
+            const passed = results.filter(r => r.passed).length;
+            const total = results.length;
+            const percentage = Math.round((passed / total) * 100);
+
+            document.getElementById('summary').innerHTML = `
+                <div>Tests Completed: ${total}</div>
+                <div style="color: ${passed === total ? '#2e7d32' : '#d32f2f'}">
+                    Passed: ${passed} | Failed: ${total - passed} | Success Rate: ${percentage}%
+                </div>
+            `;
+
+            if (passed === total) {
+                console.log('✓ All tests passed!');
+            } else {
+                console.log(`✗ ${total - passed} test(s) failed`);
+            }
+        }
+
+        // Run tests when page loads
+        window.addEventListener('DOMContentLoaded', runTests);
+    </script>
+</body>
+</html>
