@@ -37,9 +37,22 @@ Add a History-Lane feature that displays all wake-up questions from the same day
 
 **Reason:** History-Lane is a new feature (minor version increment)
 
+### 4. test.html
+**Changes:**
+- Add new test section for History-Lane functionality
+- Copy History-Lane functions for testing (getCurrentDayMonth, filterQuestionsByDayMonth, sortQuestionsDescending)
+- Implement comprehensive unit tests for:
+  - Date extraction and formatting
+  - Question filtering by day/month
+  - Descending sort order
+  - Edge cases (leap years, empty results)
+- Expected: All new tests pass (green)
+
+**Reason:** Ensure History-Lane logic is correct before deployment
+
 ## Files to Create
 
-### 4. historylane.html
+### 5. historylane.html
 **Structure:**
 ```html
 <!DOCTYPE html>
@@ -65,7 +78,7 @@ Add a History-Lane feature that displays all wake-up questions from the same day
 </html>
 ```
 
-### 5. historylane.js
+### 6. historylane.js
 **Core Logic:**
 
 #### Constants
@@ -159,8 +172,31 @@ const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/
    - Error handling
 9. Commit: "Implement History-Lane JavaScript logic"
 
-### Phase 5: Testing
-10. **Manual Browser Tests**:
+### Phase 5: Unit Testing
+10. **test.html**: Add History-Lane unit tests (REQUIRED)
+    - Extend test.html with History-Lane tests
+    - Create test section for History-Lane functionality
+    - Copy/adapt functions from historylane.js for testing
+    - **Tests to implement:**
+      - `getCurrentDayMonth()` - Verify correct DD.MM format
+      - `filterQuestionsByDayMonth()` - Test filtering logic with mock data
+        - Test matching questions are included
+        - Test non-matching questions are excluded
+        - Test various date formats (DD.MM.YYYY)
+      - `sortQuestionsDescending()` - Test sorting logic
+        - Test correct descending order
+        - Test with mixed years
+        - Test with same year, different months
+      - Date parsing robustness
+        - Test leap year dates (29.02)
+        - Test edge cases (01.01, 31.12)
+      - Empty results handling
+        - Test when no questions match current date
+    - Verify all tests pass (green)
+11. Commit: "Add unit tests for History-Lane functionality"
+
+### Phase 6: Manual Browser Testing
+12. **Manual Browser Tests**:
     - Visit index.html
     - Click History-Lane link
     - Verify correct questions for today's date
@@ -170,17 +206,12 @@ const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/
     - Test on mobile viewport
     - Test error handling (break GitHub URL temporarily)
     - Verify version number displays
+    - Run test.html and verify all History-Lane tests pass
 
-11. **Unit Tests** (optional):
-    - Could add tests to test.html for date filtering logic
-    - Test getCurrentDayMonth()
-    - Test filterQuestionsByDayMonth()
-    - Test sortQuestionsDescending()
-
-### Phase 6: Final Commit
-12. Fix any bugs found during testing
-13. Ensure version is v1.2.0 on both pages
-14. Final commit if needed: "Fix History-Lane bugs"
+### Phase 7: Final Commit
+13. Fix any bugs found during testing
+14. Ensure version is v1.2.0 on both pages
+15. Final commit if needed: "Fix History-Lane bugs"
 
 ## Edge Cases to Handle
 
@@ -194,6 +225,15 @@ const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/
 
 ## Testing Checklist
 
+### Unit Tests (test.html)
+- [ ] All History-Lane unit tests pass (green)
+- [ ] `getCurrentDayMonth()` test passes
+- [ ] `filterQuestionsByDayMonth()` tests pass (matching, non-matching, formats)
+- [ ] `sortQuestionsDescending()` tests pass (descending order, mixed years)
+- [ ] Date parsing tests pass (leap years, edge cases)
+- [ ] Empty results handling test passes
+
+### Manual Browser Tests
 - [ ] History-Lane link appears on index page
 - [ ] Link navigates to historylane.html
 - [ ] History-Lane page shows correct heading
