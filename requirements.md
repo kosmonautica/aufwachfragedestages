@@ -53,6 +53,16 @@
 - FTP upload to web hosting
 - No build steps required
 
+### Versioning
+- Version number must be displayed on the website (bottom right, small font)
+- Version follows semantic versioning (e.g., v1.0.0, v1.1.0, v2.0.0)
+- Version number is stored in `script.js` as a constant
+- Version must be manually incremented with each commit that changes functionality or fixes bugs
+- Version increment guidelines:
+  - **Patch** (v1.0.X): Bug fixes, minor text changes
+  - **Minor** (v1.X.0): New features, design changes
+  - **Major** (vX.0.0): Breaking changes, major redesigns
+
 ## 4. Non-Functional Requirements
 
 ### Performance
@@ -78,10 +88,12 @@
 - Date/Attribution: Light gray (#aaaaaa)
 
 ### Layout (vertically centered)
-1. **Wake-up question** (centered, large font)
-2. **Date** (below, small font, gray)
-3. **Attribution:** "Author: Udo Wiegärtner | Source: www.aufwachfrage.de"
-4. **Button:** "New question from aufwachfrage.de"
+1. **Page heading** (top, centered): "Aufwachfrage des Tages aus dem Archiv von www.aufwachfrage.de."
+2. **Wake-up question** (centered, large font)
+3. **Date** (below question, small font, gray)
+4. **Attribution:** "Author: Udo Wiegärtner | Source: www.aufwachfrage.de"
+5. **Button:** "Nächste Frage aus dem Archiv der Aufwachfrage."
+6. **Version number** (bottom right corner, very small font, e.g., "v1.0.0")
 
 ### Typography
 - Minimalistic, easily readable
