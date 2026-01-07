@@ -338,6 +338,34 @@ td:first-child {
     border-color: #666666;
 }
 
+/* Date select dropdowns */
+.date-select {
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #444444;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border-radius: 4px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    min-width: 100px;
+}
+
+.date-select option {
+    background-color: #2a2a2a;
+    color: #ffffff;
+}
+
+.date-select:hover {
+    border-color: #ffffff;
+}
+
+.date-select:focus {
+    outline: none;
+    border-color: #ffffff;
+}
+
 /* Date navigation links */
 .date-navigation {
     display: flex;
@@ -369,11 +397,10 @@ td:first-child {
         gap: 8px;
     }
 
-    .date-controls input[type="text"] {
+    .date-select {
         font-size: 0.9rem;
-        padding: 8px 12px;
-        min-width: 70px;
-        max-width: 90px;
+        padding: 8px 10px;
+        min-width: 90px;
     }
 
     .date-controls .button {
@@ -400,11 +427,11 @@ td:first-child {
         flex-direction: column;
     }
 
-    .date-controls input[type="text"] {
+    .date-select {
         font-size: 0.85rem;
-        padding: 8px 12px;
-        min-width: 70px;
-        max-width: 90px;
+        padding: 8px 10px;
+        width: 100%;
+        min-width: auto;
     }
 
     .date-controls .button {

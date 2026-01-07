@@ -529,6 +529,70 @@ More text here.`;
                 `31.02.2024 is correctly identified as invalid`
             );
 
+            // ===== DATE PICKER DROPDOWN TESTS =====
+
+            // Test 36: getDaysInMonth for each month
+            const monthDays = [
+                { month: 1, expected: 31 },
+                { month: 2, expected: 28 },
+                { month: 4, expected: 30 },
+                { month: 12, expected: 31 }
+            ];
+
+            monthDays.forEach(test => {
+                const result = getDaysInMonth(test.month);
+                assert(
+                    result === test.expected,
+                    `Date Picker: getDaysInMonth(${test.month})`,
+                    `Returns ${result} days (expected ${test.expected})`
+                );
+            });
+
+            // Test 37: Day selection preservation on month change
+            // Simulate: Select day 15, then select different months
+            // The day should be preserved if valid for that month
+            const daysPreservationTests = [
+                { initialDay: '15', newMonth: '01', shouldPreserve: true, description: '15th in January (valid)' },
+                { initialDay: '15', newMonth: '02', shouldPreserve: true, description: '15th in February (valid)' },
+                { initialDay: '31', newMonth: '04', shouldPreserve: false, description: '31st in April (invalid - only 30 days)' },
+                { initialDay: '29', newMonth: '02', shouldPreserve: false, description: '29th in February non-leap year (invalid)' },
+            ];
+
+            // For each test case, verify the preservation logic
+            daysPreservationTests.forEach(test => {
+                const dayNum = parseInt(test.initialDay);
+                const monthNum = parseInt(test.newMonth);
+                const maxDays = getDaysInMonth(monthNum);
+                const shouldBeValid = dayNum <= maxDays;
+
+                assert(
+                    shouldBeValid === test.shouldPreserve,
+                    `Date Picker: Day preservation - ${test.description}`,
+                    shouldBeValid
+                        ? `Day ${test.initialDay} is valid for month ${test.newMonth}`
+                        : `Day ${test.initialDay} is invalid for month ${test.newMonth} (max ${maxDays} days)`
+                );
+            });
+
+            // Test 38: Verify invalid day is not preserved
+            const invalidDay = 31;
+            const februaryDays = getDaysInMonth(2);
+            const isInvalidForFeb = invalidDay > februaryDays;
+            assert(
+                isInvalidForFeb,
+                'Date Picker: Invalid day detection for February',
+                `31st is correctly identified as invalid for February (max ${februaryDays} days)`
+            );
+
+            // Test 39: Verify valid day is preserved
+            const validDay = 15;
+            const allMonthsHave15Days = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].every(month => getDaysInMonth(month) >= validDay);
+            assert(
+                allMonthsHave15Days,
+                'Date Picker: Valid day preservation across all months',
+                `15th is valid in all 12 months`
+            );
+
             // Display summary
             const passed = results.filter(r => r.passed).length;
             const total = results.length;

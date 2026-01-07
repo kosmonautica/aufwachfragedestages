@@ -35,8 +35,9 @@
 - **Access:** Link at the bottom of the index page with text "Welche Aufwachfragen gab es am heutigen Datum in den letzten Jahren?"
 - **Inputs:**
   - Current date (automatic, client-side) - shown by default on page load
-  - Custom date selection via text input field in DD.MM format (e.g., 07.01) for manual entry
-  - Button "Aktualisieren" to load questions for manually entered date
+  - Custom date selection via two dropdown menus: Day (1-31) and Month (January-December)
+  - Day dropdown dynamically updates based on selected month (e.g., February shows max 28 days)
+  - Button "Aktualisieren" to load questions for selected date
   - Button "Heute" to reset to today's date (always visible)
   - Navigation links "Früher" and "Später" to navigate day-by-day backward/forward with automatic refresh
 - **Outputs:**
@@ -48,10 +49,12 @@
   - Sorted in descending order (newest first)
   - Empty state message when no questions exist for selected date: "Für dieses Datum sind keine Aufwachfragen vorhanden."
 - **Validation:**
-  - Input field requires DD.MM format (enforced by HTML pattern attribute)
-  - Invalid dates are detected and rejected (e.g., 31.02)
-  - User receives error message if format is incorrect or date is invalid
+  - Day dropdown only shows valid days for the selected month
+  - Invalid date combinations are automatically prevented (e.g., 31st not available in February)
+  - Both day and month must be selected before loading
+  - User receives error message if either field is empty when "Aktualisieren" is clicked
   - Year is not required as only day and month are relevant for filtering
+  - Selected day is preserved when changing month if it's valid for the new month (e.g., 15th remains when switching from Jan to Feb)
 - **Navigation behavior:**
   - "Früher" decrements the displayed date by one day
   - "Später" increments the displayed date by one day
@@ -142,12 +145,14 @@
 2. **Date selection controls** (centered, below heading):
    - Label: "Datum auswählen:"
    - Date input row (horizontal layout on desktop, vertical on mobile):
-     - Text input field showing DD.MM format (styled consistently with dark theme, auto-updates to show current displayed date, centered text, compact width ~80-100px)
-     - Placeholder: "dd.mm"
-     - Button: "Aktualisieren" (positioned right of input field)
+     - Day dropdown: Shows days 1-31 (or fewer depending on selected month), dynamically updates based on month
+     - Month dropdown: Shows all 12 months (Januar-Dezember) with German month names
+     - Auto-updates dropdowns to show currently displayed date
+     - Button: "Aktualisieren" (positioned right of dropdown fields)
      - Button: "Heute" (positioned right of Aktualisieren button, always visible)
    - Navigation links: "← Früher" and "Später →" (styled as links, positioned below date input row)
    - Styling: Minimalistic, centered, consistent spacing, compact layout
+   - Both dropdowns must be selected to load questions (validation prevents incomplete selections)
 3. **Table** (centered):
    - Column 1: Date (DD.MM.YYYY format)
    - Column 2: Wake-Up Question
@@ -190,13 +195,15 @@
 - **Manual Browser Tests**:
   - Main page: GitHub fetch works, random selection, no immediate repetition
   - History-Lane:
-    - Default behavior: Shows current date questions on load
-    - Date picker field displays current date in DD.MM format (no year)
-    - Date picker accepts manual input in DD.MM format (e.g., 07.01)
-    - Invalid date format shows error message
-    - Invalid dates (e.g., 31.02) are rejected with error message
-    - Date picker field auto-updates when navigating or resetting
-    - Custom date filtering works correctly
+    - Default behavior: Shows current date questions on load with dropdowns set to today
+    - Day dropdown displays days 1-31 (or fewer for selected month)
+    - Month dropdown displays all 12 German month names
+    - Dropdowns auto-update when navigating or resetting to reflect current date
+    - Day dropdown preserves selection when month changes if valid (e.g., 15 remains valid in all months)
+    - Day dropdown resets when invalid for new month (e.g., 31st unavailable in February)
+    - Both day and month must be selected to load questions
+    - Error message shown if user clicks "Aktualisieren" without selecting both day and month
+    - Custom date filtering works correctly with dropdown selections
     - "Aktualisieren" button loads questions for selected date
     - "Heute" button is always visible and resets to current date
     - "Früher" link navigates backward one day with automatic refresh

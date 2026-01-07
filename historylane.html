@@ -14,9 +14,26 @@
 
         <h2 class="page-heading">Aufwachfragen des heutigen Tages aus den letzten Jahren</h2>
         <div class="date-controls">
-            <label for="datePicker">Datum auswählen:</label>
+            <label>Datum auswählen:</label>
             <div class="date-input-row">
-                <input type="text" id="datePicker" placeholder="dd.mm" pattern="\d{2}\.\d{2}" />
+                <select id="daySelect" class="date-select">
+                    <option value="">Tag</option>
+                </select>
+                <select id="monthSelect" class="date-select">
+                    <option value="">Monat</option>
+                    <option value="01">Januar</option>
+                    <option value="02">Februar</option>
+                    <option value="03">März</option>
+                    <option value="04">April</option>
+                    <option value="05">Mai</option>
+                    <option value="06">Juni</option>
+                    <option value="07">Juli</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">Oktober</option>
+                    <option value="11">November</option>
+                    <option value="12">Dezember</option>
+                </select>
                 <button id="loadDateButton" class="button">Aktualisieren</button>
                 <button id="resetButton" class="button secondary">Heute</button>
             </div>

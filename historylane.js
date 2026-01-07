@@ -10,7 +10,8 @@ const errorMessage = document.getElementById('errorMessage');
 const tableContainer = document.getElementById('tableContainer');
 const tableBody = document.getElementById('tableBody');
 const versionElement = document.getElementById('version');
-const datePicker = document.getElementById('datePicker');
+const daySelect = document.getElementById('daySelect');
+const monthSelect = document.getElementById('monthSelect');
 const loadDateButton = document.getElementById('loadDateButton');
 const resetButton = document.getElementById('resetButton');
 const previousDay = document.getElementById('previousDay');
@@ -60,10 +61,53 @@ function decrementDay(dayMonth) {
 }
 
 /**
+ * Get maximum days for a given month
+ * @param {Number} month - Month number (1-12)
+ * @returns {Number} Number of days in the month
+ */
+function getDaysInMonth(month) {
+    const daysPerMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    return daysPerMonth[month - 1] || 31;
+}
+
+/**
+ * Update day select options based on selected month
+ * Preserves the currently selected day if it's valid for the new month
+ */
+function updateDayOptions() {
+    const selectedMonth = parseInt(monthSelect.value) || new Date().getMonth() + 1;
+    const maxDays = getDaysInMonth(selectedMonth);
+    const previouslySelectedDay = daySelect.value; // Save current selection
+
+    // Clear day select
+    daySelect.innerHTML = '<option value="">Tag</option>';
+
+    // Add day options
+    for (let day = 1; day <= maxDays; day++) {
+        const option = document.createElement('option');
+        option.value = String(day).padStart(2, '0');
+        option.textContent = String(day).padStart(2, '0');
+        daySelect.appendChild(option);
+    }
+
+    // Restore previously selected day if it's still valid, otherwise reset
+    if (previouslySelectedDay && previouslySelectedDay !== '') {
+        const dayNum = parseInt(previouslySelectedDay);
+        if (dayNum <= maxDays) {
+            daySelect.value = previouslySelectedDay; // Valid - restore it
+        }
+        // If invalid (e.g., 31st for February), leave it unselected
+    }
+}
+
+/**
  * Update date picker to show the current displayed day/month
  */
 function updateDatePicker() {
-    datePicker.value = currentDisplayedDayMonth;
+    const [day, month] = currentDisplayedDayMonth.split('.');
+    monthSelect.value = month;
+    updateDayOptions();
+    daySelect.value = day;
 }
 
 /**
@@ -258,37 +302,24 @@ async function loadHistoryLane(dayMonth = null) {
 
 // Event Listeners
 
-// Load questions for selected date
+// Load questions for selected date from dropdowns
 loadDateButton.addEventListener('click', () => {
-    if (datePicker.value) {
-        // datePicker.value is in DD.MM format
-        const parts = datePicker.value.split('.');
+    const day = daySelect.value;
+    const month = monthSelect.value;
 
-        // Validate format
-        if (parts.length === 2 && parts[0].length === 2 && parts[1].length === 2) {
-            const day = parseInt(parts[0]);
-            const month = parseInt(parts[1]);
-
-            // Validate ranges
-            if (day >= 1 && day <= 31 && month >= 1 && month <= 12) {
-                // Use current year for validation
-                const currentYear = new Date().getFullYear();
-                const testDate = new Date(currentYear, month - 1, day);
-
-                // Validate that the date is valid (handles invalid dates like 31.02)
-                if (testDate.getDate() === day && testDate.getMonth() === month - 1) {
-                    loadHistoryLane(datePicker.value);
-                } else {
-                    alert('Ungültiges Datum. Bitte verwenden Sie das Format dd.mm');
-                }
-            } else {
-                alert('Ungültiges Datum. Tag muss zwischen 01-31 und Monat zwischen 01-12 sein.');
-            }
-        } else {
-            alert('Bitte verwenden Sie das Format dd.mm');
-        }
+    // Validate that both day and month are selected
+    if (!day || !month) {
+        alert('Bitte wählen Sie einen Tag und einen Monat aus.');
+        return;
     }
+
+    // Create DD.MM format and load
+    const selectedDayMonth = `${day}.${month}`;
+    loadHistoryLane(selectedDayMonth);
 });
+
+// Update day options when month changes
+monthSelect.addEventListener('change', updateDayOptions);
 
 // Reset to current date (today)
 resetButton.addEventListener('click', () => {
@@ -313,6 +344,9 @@ nextDay.addEventListener('click', (e) => {
 if (versionElement) {
     versionElement.textContent = VERSION;
 }
+
+// Initialize day select dropdown on page load
+updateDayOptions();
 
 // Load History-Lane on page load (with current date)
 loadHistoryLane();
