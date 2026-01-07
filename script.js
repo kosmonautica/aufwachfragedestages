@@ -1,3 +1,6 @@
+// Version
+const VERSION = 'v1.0.0';
+
 // GitHub data source
 const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/main/README.md';
 
@@ -9,6 +12,7 @@ let lastQuestion = null;
 const questionElement = document.getElementById('question');
 const dateElement = document.getElementById('date');
 const newQuestionBtn = document.getElementById('newQuestionBtn');
+const versionElement = document.getElementById('version');
 
 /**
  * Fetch and parse questions from GitHub
@@ -148,6 +152,11 @@ async function loadNewQuestion() {
 
 // Event listeners
 newQuestionBtn.addEventListener('click', loadNewQuestion);
+
+// Display version number
+if (versionElement) {
+    versionElement.textContent = VERSION;
+}
 
 // Load first question on page load
 loadNewQuestion();

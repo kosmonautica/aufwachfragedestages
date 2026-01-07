@@ -27,6 +27,15 @@ body {
     gap: 40px;
 }
 
+/* Page heading */
+.page-heading {
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: #aaaaaa;
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+}
+
 /* Question section */
 .question-container {
     margin-bottom: 20px;
@@ -79,6 +88,16 @@ body {
     transform: scale(0.98);
 }
 
+/* Version number */
+.version {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 0.65rem;
+    color: #666666;
+    font-weight: 300;
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .question {
@@ -88,6 +107,10 @@ body {
     .btn {
         font-size: 0.9rem;
         padding: 10px 20px;
+    }
+
+    .page-heading {
+        font-size: 1rem;
     }
 }
 
@@ -99,5 +122,15 @@ body {
     .date,
     .attribution p {
         font-size: 0.75rem;
+    }
+
+    .page-heading {
+        font-size: 0.9rem;
+    }
+
+    .version {
+        font-size: 0.6rem;
+        bottom: 8px;
+        right: 8px;
     }
 }
