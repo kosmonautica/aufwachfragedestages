@@ -54,6 +54,10 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
 - Comments for important logic sections (e.g., Markdown table parsing)
 - German variable/function names are acceptable
 
+### AI Workflow Preferences
+- Use thinking mode only when explicitly requested for complex problem-solving
+- Keep responses concise and focused on the task at hand
+
 ## Requirements
 
 **See `requirements.md` for:**
