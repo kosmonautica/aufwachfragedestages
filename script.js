@@ -43,8 +43,8 @@ function parseMarkdownTable(markdown) {
     for (let line of lines) {
         // Check if line is a table row
         if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
-            // Skip header row (contains "Datum" or "Date")
-            if (line.includes('Datum') || line.includes('Date') || line.includes('Aufwachfrage')) {
+            // Skip header row (contains "Datum" AND is a header, not a date like "01.01.2024")
+            if ((line.includes('Datum') || line.includes('Date')) && !line.match(/\d{2}\.\d{2}\.\d{4}/)) {
                 inTable = true;
                 continue;
             }

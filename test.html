@@ -125,7 +125,7 @@ More text here.`;
 
             for (let line of lines) {
                 if (line.trim().startsWith('|') && line.trim().endsWith('|')) {
-                    if (line.includes('Datum') || line.includes('Date') || line.includes('Aufwachfrage')) {
+                    if ((line.includes('Datum') || line.includes('Date')) && !line.match(/\d{2}\.\d{2}\.\d{4}/)) {
                         inTable = true;
                         continue;
                     }
