@@ -256,4 +256,5 @@ const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/
 ✅ Clean, readable table design
 ✅ Consistent with main page design (dark theme)
 ✅ Version v1.2.0 displayed on both pages
-✅ All tests pass
+✅ All unit tests pass (test.html shows all green)
+✅ All manual browser tests pass
