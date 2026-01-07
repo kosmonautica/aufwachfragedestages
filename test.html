@@ -253,6 +253,142 @@ More text here.`;
                 'Special characters stored as plain text'
             );
 
+            // ===== HISTORY-LANE TESTS =====
+
+            // Copy of History-Lane functions for testing
+            function getCurrentDayMonth_test() {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                return `${day}.${month}`;
+            }
+
+            function filterQuestionsByDayMonth_test(questions, dayMonth) {
+                return questions.filter(q => {
+                    const dateParts = q.date.split('.');
+                    if (dateParts.length >= 2) {
+                        const questionDayMonth = `${dateParts[0]}.${dateParts[1]}`;
+                        return questionDayMonth === dayMonth;
+                    }
+                    return false;
+                });
+            }
+
+            function sortQuestionsDescending_test(questions) {
+                return questions.sort((a, b) => {
+                    const parseDate = (dateStr) => {
+                        const parts = dateStr.split('.');
+                        if (parts.length === 3) {
+                            return new Date(`${parts[2]}-${parts[1]}-${parts[0]}`);
+                        }
+                        return new Date(0);
+                    };
+                    const dateA = parseDate(a.date);
+                    const dateB = parseDate(b.date);
+                    return dateB - dateA;
+                });
+            }
+
+            // Mock data for History-Lane tests
+            const historyMockData = [
+                { date: '07.01.2024', question: 'Question from 2024' },
+                { date: '07.01.2023', question: 'Question from 2023' },
+                { date: '07.01.2022', question: 'Question from 2022' },
+                { date: '08.01.2024', question: 'Different day question' },
+                { date: '07.02.2024', question: 'Different month question' },
+                { date: '29.02.2020', question: 'Leap year question' }
+            ];
+
+            // Test 13: getCurrentDayMonth format
+            const currentDayMonth = getCurrentDayMonth_test();
+            assert(
+                /^\d{2}\.\d{2}$/.test(currentDayMonth),
+                'History-Lane: getCurrentDayMonth format',
+                `Returns DD.MM format: ${currentDayMonth}`
+            );
+
+            // Test 14: Filter matching questions
+            const filtered07_01 = filterQuestionsByDayMonth_test(historyMockData, '07.01');
+            assert(
+                filtered07_01.length === 3,
+                'History-Lane: Filter matching questions',
+                'Correctly filters 3 questions for 07.01'
+            );
+
+            // Test 15: Filter excludes non-matching
+            const allMatching = filtered07_01.every(q => q.date.startsWith('07.01'));
+            assert(
+                allMatching,
+                'History-Lane: Filter excludes non-matching',
+                'All filtered questions match 07.01'
+            );
+
+            // Test 16: Filter with no matches
+            const filtered99_99 = filterQuestionsByDayMonth_test(historyMockData, '99.99');
+            assert(
+                filtered99_99.length === 0,
+                'History-Lane: Filter with no matches',
+                'Returns empty array when no matches found'
+            );
+
+            // Test 17: Descending sort order
+            const sorted = sortQuestionsDescending_test([...historyMockData]);
+            const first = sorted[0].date;
+            const last = sorted[sorted.length - 1].date;
+            assert(
+                first.includes('2024') && !last.includes('2024'),
+                'History-Lane: Descending sort order',
+                'Newest questions first (2024 before 2020)'
+            );
+
+            // Test 18: Sort with same year different months
+            const sameYearData = [
+                { date: '01.03.2024', question: 'March' },
+                { date: '01.01.2024', question: 'January' }
+            ];
+            const sortedSameYear = sortQuestionsDescending_test([...sameYearData]);
+            assert(
+                sortedSameYear[0].date === '01.03.2024',
+                'History-Lane: Sort same year different months',
+                'March comes before January (descending)'
+            );
+
+            // Test 19: Leap year date handling
+            const leapYearFiltered = filterQuestionsByDayMonth_test(historyMockData, '29.02');
+            assert(
+                leapYearFiltered.length === 1,
+                'History-Lane: Leap year date handling',
+                'Correctly handles February 29th'
+            );
+
+            // Test 20: Edge case - January 1st
+            const edgeCaseData = [{ date: '01.01.2024', question: 'New Year' }];
+            const edgeFiltered = filterQuestionsByDayMonth_test(edgeCaseData, '01.01');
+            assert(
+                edgeFiltered.length === 1,
+                'History-Lane: Edge case January 1st',
+                'Correctly handles 01.01'
+            );
+
+            // Test 21: Edge case - December 31st
+            const dec31Data = [{ date: '31.12.2023', question: 'New Years Eve' }];
+            const dec31Filtered = filterQuestionsByDayMonth_test(dec31Data, '31.12');
+            assert(
+                dec31Filtered.length === 1,
+                'History-Lane: Edge case December 31st',
+                'Correctly handles 31.12'
+            );
+
+            // Test 22: Multiple years same day/month
+            const multiYear = filterQuestionsByDayMonth_test(historyMockData, '07.01');
+            const years = multiYear.map(q => q.date.split('.')[2]);
+            const uniqueYears = [...new Set(years)];
+            assert(
+                uniqueYears.length === 3,
+                'History-Lane: Multiple years same day/month',
+                'Correctly finds questions across 3 different years'
+            );
+
             // Display summary
             const passed = results.filter(r => r.passed).length;
             const total = results.length;

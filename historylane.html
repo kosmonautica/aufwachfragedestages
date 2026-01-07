@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="de" translate="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="History-Lane - Aufwachfragen des heutigen Tages aus allen Jahren">
+    <meta name="google" content="notranslate">
+    <title>History-Lane - Aufwachfrage</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <a href="index.html" class="back-link">← Zurück zur Hauptseite</a>
+
+        <h2 class="page-heading">Aufwachfragen des heutigen Tages aus den letzten Jahren</h2>
+
+        <div id="loadingMessage" class="loading">Laden...</div>
+        <div id="errorMessage" class="empty-message" style="display: none;"></div>
+
+        <div class="table-container" id="tableContainer" style="display: none;">
+            <table id="historyTable">
+                <thead>
+                    <tr>
+                        <th>Datum</th>
+                        <th>Aufwachfrage</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <div class="version" id="version"></div>
+
+    <script src="historylane.js"></script>
+</body>
+</html>
