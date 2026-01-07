@@ -27,8 +27,13 @@ python3 -m http.server
 Manual browser testing required (see test cases in `requirements.md`, section 6).
 
 ### Testing Before Commit
-**CRITICAL: Always run all tests before committing changes**
+**CRITICAL: Run all tests before committing code changes**
 
+**When to test:**
+- ✅ **Required** when changing: `index.html`, `style.css`, `script.js`, or `test.html`
+- ❌ **Not required** when only changing: `requirements.md`, `CLAUDE.md`, `README.md`, or other documentation files
+
+**Test checklist for code changes:**
 1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (12/12)
 2. **Manual Browser Tests**: Open `http://localhost:8000/` and verify:
    - Questions load correctly from GitHub
@@ -41,7 +46,7 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
    - Error handling works (temporarily break GitHub URL to test)
 3. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered
 
-**Never commit without completing all tests above.**
+**Never commit code changes without completing all tests above.**
 
 ### Deployment
 - FTP upload of the three files to web hosting
