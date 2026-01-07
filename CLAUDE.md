@@ -36,9 +36,9 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
 - ❌ **Not required** when only changing: `requirements.md`, `CLAUDE.md`, `README.md`, `IMPLEMENTATION_PLAN.md`, or other documentation files
 
 **Test checklist for code changes:**
-1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (22/22)
+1. **Unit Tests**: Open `http://localhost:8000/test.html` and verify all tests pass (35/35)
    - 12 tests for main page functionality
-   - 10 tests for History-Lane functionality
+   - 23 tests for History-Lane functionality
 2. **Manual Browser Tests - Main Page**: Open `http://localhost:8000/` and verify:
    - Questions load correctly from GitHub
    - Random selection works (click button multiple times)
@@ -50,13 +50,34 @@ Manual browser testing required (see test cases in `requirements.md`, section 6)
    - Responsive design works (test on mobile viewport)
    - Error handling works (temporarily break GitHub URL to test)
 3. **Manual Browser Tests - History-Lane**: Open `http://localhost:8000/historylane.html` and verify:
-   - Questions for current day/month are displayed
-   - Questions are sorted descending (newest first)
+   - Default behavior: Questions for current day/month are displayed on load
+   - Date picker field shows current date in DD.MM.YYYY format on load
+   - Calendar icon (📅) is visible next to date field
+   - Click on calendar icon opens native date picker
+   - Select date in native picker converts to DD.MM.YYYY format and auto-loads questions
+   - Date picker input accepts manual input in DD.MM.YYYY format (e.g., 07.01.2024)
+   - Enter a custom date in DD.MM.YYYY format and click "Aktualisieren"
+   - Questions for selected date are displayed correctly
+   - "Heute" button is always visible
+   - Click "Heute" and verify it resets to current date
+   - Date picker field updates to show current date after clicking "Heute"
+   - Click "Früher" (previous day) multiple times and verify:
+     - Questions update automatically after each click
+     - Date picker field updates to show new date
+     - Navigation works across month boundaries (e.g., from Feb 1 to Jan 31)
+   - Click "Später" (next day) multiple times and verify:
+     - Questions update automatically after each click
+     - Date picker field updates to show new date
+     - Navigation works across month boundaries (e.g., from Jan 31 to Feb 1)
+   - Empty state message "Für dieses Datum sind keine Aufwachfragen vorhanden." displays when no questions found (test with a date like 15.06)
+   - Questions are sorted descending (newest first) for all dates
    - Table is readable and well-styled (dark theme)
+   - Date controls are properly styled and centered
+   - Navigation links "Früher" and "Später" are visible and properly styled
    - Back link returns to index page
-   - Version number displays v1.2.0
+   - Version number displays v1.3.0
    - Exact wording preserved (no translation)
-   - Responsive design works on mobile
+   - Responsive design works on mobile (including date picker and navigation links)
 4. **Visual Inspection**: Check that all styling looks correct, text is readable, layout is centered on both pages
 
 **Never commit code changes without completing all tests above.**

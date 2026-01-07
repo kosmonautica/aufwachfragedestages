@@ -1,5 +1,5 @@
 // Version
-const VERSION = 'v1.2.0';
+const VERSION = 'v1.3.0';
 
 // GitHub data source
 const GITHUB_URL = 'https://raw.githubusercontent.com/kosmonautica/Aufwachfrage/main/README.md';
@@ -10,6 +10,16 @@ const errorMessage = document.getElementById('errorMessage');
 const tableContainer = document.getElementById('tableContainer');
 const tableBody = document.getElementById('tableBody');
 const versionElement = document.getElementById('version');
+const datePicker = document.getElementById('datePicker');
+const datePickerNative = document.getElementById('datePickerNative');
+const calendarIcon = document.getElementById('calendarIcon');
+const loadDateButton = document.getElementById('loadDateButton');
+const resetButton = document.getElementById('resetButton');
+const previousDay = document.getElementById('previousDay');
+const nextDay = document.getElementById('nextDay');
+
+// Track currently displayed date (as Date object)
+let currentDisplayedDate = new Date();
 
 /**
  * Get current day and month in DD.MM format
@@ -19,6 +29,41 @@ function getCurrentDayMonth() {
     const day = String(now.getDate()).padStart(2, '0');
     const month = String(now.getMonth() + 1).padStart(2, '0');
     return `${day}.${month}`;
+}
+
+/**
+ * Convert Date object to DD.MM format
+ * @param {Date} date - Date object
+ * @returns {String} DD.MM format
+ */
+function dateToDD_MM(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    return `${day}.${month}`;
+}
+
+/**
+ * Convert Date object to DD.MM.YYYY format (for date input field)
+ * @param {Date} date - Date object
+ * @returns {String} DD.MM.YYYY format
+ */
+function dateToDD_MM_YYYY(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${day}.${month}.${year}`;
+}
+
+/**
+ * Update date picker to show the current displayed date
+ */
+function updateDatePicker() {
+    datePicker.value = dateToDD_MM_YYYY(currentDisplayedDate);
+    // Also update native date picker
+    const year = currentDisplayedDate.getFullYear();
+    const month = String(currentDisplayedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(currentDisplayedDate.getDate()).padStart(2, '0');
+    datePickerNative.value = `${year}-${month}-${day}`;
 }
 
 /**
@@ -139,7 +184,7 @@ function displayHistoryTable(questions) {
     if (questions.length === 0) {
         // Show empty message
         loadingMessage.style.display = 'none';
-        errorMessage.textContent = 'Keine Fragen für diesen Tag gefunden.';
+        errorMessage.textContent = 'Für dieses Datum sind keine Aufwachfragen vorhanden.';
         errorMessage.style.display = 'block';
         tableContainer.style.display = 'none';
         return;
@@ -179,17 +224,33 @@ function showError(message) {
 
 /**
  * Main function to load History-Lane
+ * @param {Date} targetDate - Optional Date object. If not provided, uses current date.
  */
-async function loadHistoryLane() {
+async function loadHistoryLane(targetDate = null) {
     try {
-        // Get current day/month
-        const currentDayMonth = getCurrentDayMonth();
+        // Show loading, hide error and table
+        loadingMessage.style.display = 'block';
+        errorMessage.style.display = 'none';
+        tableContainer.style.display = 'none';
+
+        // Update current displayed date
+        if (targetDate) {
+            currentDisplayedDate = new Date(targetDate);
+        } else {
+            currentDisplayedDate = new Date();
+        }
+
+        // Update date picker to reflect current displayed date
+        updateDatePicker();
+
+        // Get day/month to filter by
+        const targetDayMonth = dateToDD_MM(currentDisplayedDate);
 
         // Fetch all questions
         const allQuestions = await fetchQuestions();
 
-        // Filter by current day/month
-        const filteredQuestions = filterQuestionsByDayMonth(allQuestions, currentDayMonth);
+        // Filter by target day/month
+        const filteredQuestions = filterQuestionsByDayMonth(allQuestions, targetDayMonth);
 
         // Sort descending
         const sortedQuestions = sortQuestionsDescending(filteredQuestions);
@@ -202,10 +263,73 @@ async function loadHistoryLane() {
     }
 }
 
+// Event Listeners
+
+// Calendar icon click - open native date picker
+calendarIcon.addEventListener('click', () => {
+    datePickerNative.showPicker();
+});
+
+// Native date picker change - update text field
+datePickerNative.addEventListener('change', () => {
+    if (datePickerNative.value) {
+        const [year, month, day] = datePickerNative.value.split('-');
+        datePicker.value = `${day}.${month}.${year}`;
+        // Auto-load questions for selected date
+        const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        loadHistoryLane(selectedDate);
+    }
+});
+
+// Load questions for selected date
+loadDateButton.addEventListener('click', () => {
+    if (datePicker.value) {
+        // datePicker.value is in DD.MM.YYYY format
+        const [day, month, year] = datePicker.value.split('.');
+
+        // Validate format
+        if (day && month && year && day.length === 2 && month.length === 2 && year.length === 4) {
+            const selectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
+            // Validate that the date is valid (handles invalid dates like 31.02.2024)
+            if (selectedDate.getDate() === parseInt(day) &&
+                selectedDate.getMonth() === parseInt(month) - 1 &&
+                selectedDate.getFullYear() === parseInt(year)) {
+                loadHistoryLane(selectedDate);
+            } else {
+                alert('Ungültiges Datum. Bitte verwenden Sie das Format dd.mm.yyyy');
+            }
+        } else {
+            alert('Bitte verwenden Sie das Format dd.mm.yyyy');
+        }
+    }
+});
+
+// Reset to current date (today)
+resetButton.addEventListener('click', () => {
+    loadHistoryLane(new Date());
+});
+
+// Navigate to previous day
+previousDay.addEventListener('click', (e) => {
+    e.preventDefault();
+    const newDate = new Date(currentDisplayedDate);
+    newDate.setDate(newDate.getDate() - 1);
+    loadHistoryLane(newDate);
+});
+
+// Navigate to next day
+nextDay.addEventListener('click', (e) => {
+    e.preventDefault();
+    const newDate = new Date(currentDisplayedDate);
+    newDate.setDate(newDate.getDate() + 1);
+    loadHistoryLane(newDate);
+});
+
 // Display version number
 if (versionElement) {
     versionElement.textContent = VERSION;
 }
 
-// Load History-Lane on page load
+// Load History-Lane on page load (with current date)
 loadHistoryLane();

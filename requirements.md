@@ -30,15 +30,35 @@
 - **Randomness:** Each button click must select a truly random question from the entire question catalog, ensuring diverse questions are shown.
 
 ### 2.3 History-Lane
-- **Description:** A separate page that displays all wake-up questions that were published on the current day (day + month) across all years.
+- **Description:** A separate page that displays all wake-up questions that were published on a specific day (day + month) across all years.
 - **Actors:** Website visitors
 - **Access:** Link at the bottom of the index page with text "Welche Aufwachfragen gab es am heutigen Datum in den letzten Jahren?"
-- **Inputs:** Current date (automatic, client-side)
+- **Inputs:**
+  - Current date (automatic, client-side) - shown by default on page load
+  - Custom date selection via:
+    - Clickable calendar icon (📅) that opens native browser date picker
+    - Text input field in DD.MM.YYYY format (e.g., 07.01.2024) for manual entry
+  - Button "Aktualisieren" to load questions for manually entered date
+  - Button "Heute" to reset to today's date (always visible)
+  - Navigation links "Früher" and "Später" to navigate day-by-day backward/forward with automatic refresh
 - **Outputs:**
   - Page heading: "Aufwachfragen des heutigen Tages aus den letzten Jahren"
+  - Date selection controls (date picker + buttons + navigation links)
+  - Date picker field automatically updates to show currently displayed date
   - Table with columns: Date | Wake-Up Question
-  - Questions filtered by current day/month (e.g., all questions from January 7th across all years)
+  - Questions filtered by selected day/month (e.g., all questions from January 7th across all years)
   - Sorted in descending order (newest first)
+  - Empty state message when no questions exist for selected date: "Für dieses Datum sind keine Aufwachfragen vorhanden."
+- **Validation:**
+  - Input field requires DD.MM.YYYY format (enforced by HTML pattern attribute)
+  - Invalid dates are detected and rejected (e.g., 31.02.2024)
+  - User receives error message if format is incorrect or date is invalid
+- **Navigation behavior:**
+  - "Früher" decrements the displayed date by one day
+  - "Später" increments the displayed date by one day
+  - Navigation works across month and year boundaries
+  - Questions automatically load after navigation
+  - Date picker field updates to reflect new date
 - **Data source:** Same GitHub Raw API as main page
 - **Navigation:** Link back to index page
 - **Version display:** Version number in bottom right corner (same as index page)
@@ -120,13 +140,24 @@
 
 ### Layout - History-Lane Page
 1. **Page heading** (top, centered): "Aufwachfragen des heutigen Tages aus den letzten Jahren"
-2. **Table** (centered):
+2. **Date selection controls** (centered, below heading):
+   - Label: "Datum auswählen:"
+   - Date input row (horizontal layout on desktop, vertical on mobile):
+     - Clickable calendar icon (📅) that opens native date picker
+     - Text input field showing DD.MM.YYYY format (styled consistently with dark theme, auto-updates to show current displayed date, centered text)
+     - Placeholder: "dd.mm.yyyy"
+     - Button: "Aktualisieren" (positioned right of input field)
+     - Button: "Heute" (positioned right of Aktualisieren button, always visible)
+   - Navigation links: "← Früher" and "Später →" (styled as links, positioned below date input row)
+   - Styling: Minimalistic, centered, consistent spacing, compact layout
+3. **Table** (centered):
    - Column 1: Date (DD.MM.YYYY format)
    - Column 2: Wake-Up Question
    - Rows sorted by date descending (newest first)
    - Minimalistic table styling (no heavy borders, clean look)
-3. **Back link** (top or bottom): Link to return to index page
-4. **Version number** (bottom right corner, very small font)
+   - Empty state: If no questions found, display message "Für dieses Datum sind keine Aufwachfragen vorhanden."
+4. **Back link** (top or bottom): Link to return to index page
+5. **Version number** (bottom right corner, very small font)
 
 ### Links
 - All occurrences of "www.aufwachfrage.de" must be clickable links
@@ -149,13 +180,34 @@
 - **Unit Tests**: `test.html` with comprehensive automated tests
   - Markdown parsing tests
   - Date filtering and sorting tests (History-Lane)
+  - Custom date selection and filtering
+  - Reset to current date functionality
+  - Day-by-day navigation (forward/backward)
+  - Navigation across month and year boundaries
+  - Date format conversion (DD.MM and YYYY-MM-DD)
+  - Empty state handling (no questions for selected date)
   - Exact wording preservation tests
   - Edge case handling (leap years, empty results)
   - All tests must pass before deployment
 - **Manual Browser Tests**:
   - Main page: GitHub fetch works, random selection, no immediate repetition
-  - History-Lane: Correct date filtering, descending sort, navigation
-  - Responsive design on mobile viewport
+  - History-Lane:
+    - Default behavior: Shows current date questions on load
+    - Date picker field displays current date in DD.MM.YYYY format
+    - Date picker accepts manual input in DD.MM.YYYY format (e.g., 07.01.2024)
+    - Invalid date format shows error message
+    - Invalid dates (e.g., 31.02.2024) are rejected with error message
+    - Date picker field auto-updates when navigating or resetting
+    - Custom date filtering works correctly
+    - "Aktualisieren" button loads questions for selected date
+    - "Heute" button is always visible and resets to current date
+    - "Früher" link navigates backward one day with automatic refresh
+    - "Später" link navigates forward one day with automatic refresh
+    - Navigation works across month boundaries (e.g., Jan 31 → Feb 1)
+    - Empty state message displays when no questions found
+    - Descending sort maintained for all date selections
+    - Navigation back to index page works
+  - Responsive design on mobile viewport (including navigation links)
   - Error handling (network failures)
 
 ### Documentation

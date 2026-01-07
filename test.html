@@ -289,6 +289,19 @@ More text here.`;
                 });
             }
 
+            function dateToDD_MM_test(date) {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                return `${day}.${month}`;
+            }
+
+            function dateToDD_MM_YYYY_test(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${day}.${month}.${year}`;
+            }
+
             // Mock data for History-Lane tests
             const historyMockData = [
                 { date: '07.01.2024', question: 'Question from 2024' },
@@ -387,6 +400,133 @@ More text here.`;
                 uniqueYears.length === 3,
                 'History-Lane: Multiple years same day/month',
                 'Correctly finds questions across 3 different years'
+            );
+
+            // Test 23: dateToDD_MM - Convert Date to DD.MM format
+            const testDate1 = new Date('2024-01-07');
+            const converted1 = dateToDD_MM_test(testDate1);
+            assert(
+                converted1 === '07.01',
+                'History-Lane: dateToDD_MM basic conversion',
+                `Converts 2024-01-07 to 07.01, got: ${converted1}`
+            );
+
+            // Test 24: dateToDD_MM - Single digit day/month padding
+            const testDate2 = new Date('2024-03-05');
+            const converted2 = dateToDD_MM_test(testDate2);
+            assert(
+                converted2 === '05.03',
+                'History-Lane: dateToDD_MM with padding',
+                `Single digits padded correctly: ${converted2}`
+            );
+
+            // Test 25: dateToDD_MM - December 31st
+            const testDate3 = new Date('2023-12-31');
+            const converted3 = dateToDD_MM_test(testDate3);
+            assert(
+                converted3 === '31.12',
+                'History-Lane: dateToDD_MM edge case Dec 31',
+                `Handles end of year correctly: ${converted3}`
+            );
+
+            // Test 26: Custom date filtering workflow
+            const customDate = new Date('2024-01-07');
+            const customDayMonth = dateToDD_MM_test(customDate);
+            const customFiltered = filterQuestionsByDayMonth_test(historyMockData, customDayMonth);
+            assert(
+                customFiltered.length === 3,
+                'History-Lane: Custom date filtering workflow',
+                'Complete workflow from Date to filtered results works'
+            );
+
+            // Test 27: Reset to current date simulation
+            const currentDate = new Date();
+            const resetDayMonth = dateToDD_MM_test(currentDate);
+            assert(
+                /^\d{2}\.\d{2}$/.test(resetDayMonth),
+                'History-Lane: Reset to current date format',
+                `Reset produces valid DD.MM format: ${resetDayMonth}`
+            );
+
+            // Test 28: dateToDD_MM_YYYY basic conversion
+            const testDateISO1 = new Date('2024-01-07');
+            const convertedISO1 = dateToDD_MM_YYYY_test(testDateISO1);
+            assert(
+                convertedISO1 === '07.01.2024',
+                'History-Lane: dateToDD_MM_YYYY basic conversion',
+                `Converts to DD.MM.YYYY format: ${convertedISO1}`
+            );
+
+            // Test 29: dateToDD_MM_YYYY with single digit day/month
+            const testDateISO2 = new Date('2024-03-05');
+            const convertedISO2 = dateToDD_MM_YYYY_test(testDateISO2);
+            assert(
+                convertedISO2 === '05.03.2024',
+                'History-Lane: dateToDD_MM_YYYY with padding',
+                `Single digits padded in DD.MM.YYYY: ${convertedISO2}`
+            );
+
+            // Test 30: Navigation - Previous day
+            const navDate1 = new Date('2024-01-15');
+            const prevDay = new Date(navDate1);
+            prevDay.setDate(prevDay.getDate() - 1);
+            assert(
+                prevDay.getDate() === 14,
+                'History-Lane: Navigate to previous day',
+                `Previous day from 15th is 14th`
+            );
+
+            // Test 31: Navigation - Next day
+            const navDate2 = new Date('2024-01-15');
+            const nextDayDate = new Date(navDate2);
+            nextDayDate.setDate(nextDayDate.getDate() + 1);
+            assert(
+                nextDayDate.getDate() === 16,
+                'History-Lane: Navigate to next day',
+                `Next day from 15th is 16th`
+            );
+
+            // Test 32: Navigation - Month boundary (backward)
+            const navDate3 = new Date('2024-02-01');
+            const prevMonth = new Date(navDate3);
+            prevMonth.setDate(prevMonth.getDate() - 1);
+            assert(
+                prevMonth.getDate() === 31 && prevMonth.getMonth() === 0,
+                'History-Lane: Navigate backward across month boundary',
+                `Previous day from Feb 1 is Jan 31`
+            );
+
+            // Test 33: Navigation - Month boundary (forward)
+            const navDate4 = new Date('2024-01-31');
+            const nextMonth = new Date(navDate4);
+            nextMonth.setDate(nextMonth.getDate() + 1);
+            assert(
+                nextMonth.getDate() === 1 && nextMonth.getMonth() === 1,
+                'History-Lane: Navigate forward across month boundary',
+                `Next day from Jan 31 is Feb 1`
+            );
+
+            // Test 34: Parse DD.MM.YYYY format
+            const testDateString = '07.01.2024';
+            const [testDay, testMonth, testYear] = testDateString.split('.');
+            const parsedDate = new Date(parseInt(testYear), parseInt(testMonth) - 1, parseInt(testDay));
+            assert(
+                parsedDate.getDate() === 7 && parsedDate.getMonth() === 0 && parsedDate.getFullYear() === 2024,
+                'History-Lane: Parse DD.MM.YYYY string format',
+                `Correctly parses 07.01.2024 to January 7, 2024`
+            );
+
+            // Test 35: Validate invalid date (31.02.2024)
+            const invalidDateString = '31.02.2024';
+            const [invDay, invMonth, invYear] = invalidDateString.split('.');
+            const invalidDate = new Date(parseInt(invYear), parseInt(invMonth) - 1, parseInt(invDay));
+            const isValidDate = invalidDate.getDate() === parseInt(invDay) &&
+                                invalidDate.getMonth() === parseInt(invMonth) - 1 &&
+                                invalidDate.getFullYear() === parseInt(invYear);
+            assert(
+                !isValidDate,
+                'History-Lane: Validate invalid date detection',
+                `31.02.2024 is correctly identified as invalid`
             );
 
             // Display summary

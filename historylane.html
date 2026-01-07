@@ -14,6 +14,23 @@
 
         <h2 class="page-heading">Aufwachfragen des heutigen Tages aus den letzten Jahren</h2>
 
+        <div class="date-controls">
+            <label for="datePicker">Datum auswählen:</label>
+            <div class="date-input-row">
+                <div class="date-input-wrapper">
+                    <button id="calendarIcon" class="calendar-icon" type="button" aria-label="Open calendar">📅</button>
+                    <input type="text" id="datePicker" placeholder="dd.mm.yyyy" pattern="\d{2}\.\d{2}\.\d{4}" />
+                    <input type="date" id="datePickerNative" style="display: none;" />
+                </div>
+                <button id="loadDateButton" class="button">Aktualisieren</button>
+                <button id="resetButton" class="button secondary">Heute</button>
+            </div>
+            <div class="date-navigation">
+                <a href="#" id="previousDay" class="nav-link">← Früher</a>
+                <a href="#" id="nextDay" class="nav-link">Später →</a>
+            </div>
+        </div>
+
         <div id="loadingMessage" class="loading">Laden...</div>
         <div id="errorMessage" class="empty-message" style="display: none;"></div>
 
