@@ -1,0 +1,178 @@
+Pushe alle folgenden Dateien per mcp__github__push_files in einem einzigen Commit. Erstelle zuerst den Branch mit mcp__github__create_branch. Parameter: owner=kosmonautica, repo=ThingExplainer, branch=claude/initial-setup, from_branch=main, message="Initial setup: real-time German word checker PWA". Hier sind alle 8 Dateien:
+
+===FILE: index.html===
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Thing Explainer</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <header>
+    <h1>Thing Explainer</h1>
+    <div class="counter">
+      <span class="count-ok" id="countOk">0</span> erlaubt
+      <span class="sep">·</span>
+      <span class="count-bad" id="countBad">0</span> verboten
+    </div>
+  </header>
+  <main>
+    <div class="editor-wrap">
+      <div id="backdrop" aria-hidden="true"></div>
+      <textarea id="input" placeholder="Tippe deine Erklaerung hier ..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
+
+===FILE: style.css===
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --bg: #0f172a; --surface: #1e293b; --text: #e2e8f0; --text-muted: #94a3b8; --green: #4ade80; --red: #f87171; --editor-pad: 1rem; --editor-font-size: 1.125rem; --editor-line-height: 1.7; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: var(--editor-font-size); line-height: var(--editor-line-height); -webkit-text-size-adjust: 100%; }
+body { display: flex; flex-direction: column; overflow: hidden; }
+header { padding: 0.75rem 1rem 0.5rem; border-bottom: 1px solid #334155; display: flex; align-items: baseline; gap: 1rem; flex-shrink: 0; }
+h1 { font-size: 1rem; font-weight: 600; color: var(--text-muted); letter-spacing: 0.05em; text-transform: uppercase; }
+.counter { font-size: 1rem; color: var(--text-muted); }
+.count-ok { color: var(--green); font-weight: 700; }
+.count-bad { color: var(--red); font-weight: 700; }
+.sep { margin: 0 0.25rem; }
+main { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 0.75rem; }
+.editor-wrap { position: relative; flex: 1; min-height: 0; }
+#backdrop, #input { position: absolute; inset: 0; padding: var(--editor-pad); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; font-size: var(--editor-font-size); line-height: var(--editor-line-height); border-radius: 0.5rem; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
+#backdrop { background: var(--surface); color: var(--text); overflow: hidden; pointer-events: none; border: 1px solid #334155; }
+#input { background: transparent; color: transparent; caret-color: var(--text); border: 1px solid #334155; outline: none; resize: none; overflow: auto; -webkit-overflow-scrolling: touch; }
+#input:focus { border-color: #4ade8055; }
+mark { background: none; }
+mark.ok { color: var(--green); }
+mark.bad { color: var(--red); }
+
+===FILE: script.js===
+const input = document.getElementById('input');
+const backdrop = document.getElementById('backdrop');
+const countOk = document.getElementById('countOk');
+const countBad = document.getElementById('countBad');
+let wordSet = new Set();
+const irregulars = new Map([
+  ['bin','sein'],['bist','sein'],['ist','sein'],['sind','sein'],['seid','sein'],['war','sein'],['warst','sein'],['waren','sein'],['wart','sein'],['gewesen','sein'],['sei','sein'],['seien','sein'],['waere','sein'],['waeren','sein'],
+  ['habe','haben'],['hast','haben'],['hat','haben'],['habt','haben'],['hatte','haben'],['hattest','haben'],['hatten','haben'],['hattet','haben'],['gehabt','haben'],['haette','haben'],['haettest','haben'],['haetten','haben'],['haettet','haben'],
+  ['werde','werden'],['wirst','werden'],['wird','werden'],['werdet','werden'],['wurde','werden'],['wurdest','werden'],['wurden','werden'],['wurdet','werden'],['geworden','werden'],['wuerde','werden'],['wuerdest','werden'],['wuerden','werden'],
+  ['kann','koennen'],['kannst','koennen'],['koennt','koennen'],['konnte','koennen'],['konntest','koennen'],['konnten','koennen'],['konntet','koennen'],['gekonnt','koennen'],['koennte','koennen'],['koenntest','koennen'],['koennten','koennen'],
+  ['muss','muessen'],['musst','muessen'],['muesst','muessen'],['musste','muessen'],['musstest','muessen'],['mussten','muessen'],['musstet','muessen'],['gemusst','muessen'],['muesste','muessen'],['muesstest','muessen'],['muessten','muessen'],
+  ['soll','sollen'],['sollst','sollen'],['sollt','sollen'],['sollte','sollen'],['solltest','sollen'],['sollten','sollen'],['solltet','sollen'],['gesollt','sollen'],
+  ['will','wollen'],['willst','wollen'],['wollt','wollen'],['wollte','wollen'],['wolltest','wollen'],['wollten','wollen'],['wolltet','wollen'],['gewollt','wollen'],
+  ['darf','duerfen'],['darfst','duerfen'],['duerft','duerfen'],['durfte','duerfen'],['durftest','duerfen'],['durften','duerfen'],['durftet','duerfen'],['gedurft','duerfen'],
+  ['mag','moegen'],['magst','moegen'],['moeget','moegen'],['mochte','moegen'],['mochtest','moegen'],['mochten','moegen'],['mochtet','moegen'],['gemocht','moegen'],
+  ['moechte','moechten'],['moechtest','moechten'],['moechtet','moechten'],
+  ['ging','gehen'],['gingst','gehen'],['gingen','gehen'],['gingt','gehen'],['gegangen','gehen'],
+  ['kam','kommen'],['kamst','kommen'],['kamen','kommen'],['kamt','kommen'],['gekommen','kommen'],
+  ['sah','sehen'],['sahst','sehen'],['sahen','sehen'],['saht','sehen'],['gesehen','sehen'],['siehst','sehen'],['sieht','sehen'],['seht','sehen'],
+  ['gab','geben'],['gabst','geben'],['gaben','geben'],['gabt','geben'],['gegeben','geben'],['gibst','geben'],['gibt','geben'],
+  ['nahm','nehmen'],['nahmst','nehmen'],['nahmen','nehmen'],['nahmt','nehmen'],['genommen','nehmen'],['nimmst','nehmen'],['nimmt','nehmen'],
+  ['fuhr','fahren'],['fuhrst','fahren'],['fuhren','fahren'],['fuhrt','fahren'],['gefahren','fahren'],['faehrst','fahren'],['faehrt','fahren'],
+  ['lief','laufen'],['liefst','laufen'],['liefen','laufen'],['lieft','laufen'],['gelaufen','laufen'],['laeufst','laufen'],['laeuft','laufen'],
+  ['hielt','halten'],['hieltest','halten'],['hielten','halten'],['hieltet','halten'],['gehalten','halten'],['haeltst','halten'],['haelt','halten'],
+  ['wusste','wissen'],['wusstest','wissen'],['wussten','wissen'],['wusstet','wissen'],['gewusst','wissen'],['weiss','wissen'],['weisst','wissen'],['wisst','wissen'],
+  ['dachte','denken'],['dachtest','denken'],['dachten','denken'],['gedacht','denken'],
+  ['brachte','bringen'],['brachtest','bringen'],['brachten','bringen'],['gebracht','bringen'],
+  ['hiess','heissen'],['hiesst','heissen'],['hiessen','heissen'],['geheissen','heissen'],
+  ['schlief','schlafen'],['schliefst','schlafen'],['schliefen','schlafen'],['geschlafen','schlafen'],['schlaefst','schlafen'],['schlaeft','schlafen'],
+  ['las','lesen'],['last','lesen'],['lasen','lesen'],['gelesen','lesen'],['liest','lesen'],['lest','lesen'],
+  ['ass','essen'],['asst','essen'],['assen','essen'],['gegessen','essen'],['isst','essen'],['esst','essen'],
+  ['trug','tragen'],['trugst','tragen'],['trugen','tragen'],['getragen','tragen'],['traegst','tragen'],['traegt','tragen'],
+  ['fand','finden'],['fandst','finden'],['fanden','finden'],['gefunden','finden'],
+  ['sprach','sprechen'],['sprachst','sprechen'],['sprachen','sprechen'],['gesprochen','sprechen'],['sprichst','sprechen'],['spricht','sprechen'],['sprecht','sprechen'],
+  ['schrieb','schreiben'],['schriebst','schreiben'],['schrieben','schreiben'],['geschrieben','schreiben'],
+  ['rief','rufen'],['riefst','rufen'],['riefen','rufen'],['gerufen','rufen'],
+  ['stand','stehen'],['standst','stehen'],['standen','stehen'],['gestanden','stehen'],
+  ['lag','liegen'],['lagst','liegen'],['lagen','liegen'],['gelegen','liegen'],
+  ['sass','sitzen'],['sasst','sitzen'],['sassen','sitzen'],['gesessen','sitzen'],
+  ['fiel','fallen'],['fielst','fallen'],['fielen','fallen'],['gefallen','fallen'],['faellt','fallen'],
+  ['vergass','vergessen'],['vergasst','vergessen'],['vergassen','vergessen'],['vergessen','vergessen'],['vergisst','vergessen'],['vergesst','vergessen'],
+  ['schlug','schlagen'],['schlugst','schlagen'],['schlugen','schlagen'],['geschlagen','schlagen'],['schlaegst','schlagen'],['schlaegt','schlagen'],
+  ['bat','bitten'],['baten','bitten'],['gebeten','bitten'],
+  ['bot','bieten'],['boten','bieten'],['geboten','bieten'],
+  ['lud','laden'],['ludst','laden'],['luden','laden'],['geladen','laden'],
+  ['liess','lassen'],['liesst','lassen'],['liessen','lassen'],['gelassen','lassen'],['laesst','lassen'],['lasst','lassen'],
+  ['zog','ziehen'],['zogst','ziehen'],['zogen','ziehen'],['gezogen','ziehen'],
+  ['trank','trinken'],['trankst','trinken'],['tranken','trinken'],['getrunken','trinken'],['trinkst','trinken'],['trinkt','trinken'],
+  ['schwamm','schwimmen'],['geschwommen','schwimmen'],['flog','fliegen'],['geflogen','fliegen'],
+  ['gewann','gewinnen'],['gewonnen','gewinnen'],['verlor','verlieren'],['verloren','verlieren'],
+  ['empfahl','empfehlen'],['empfohlen','empfehlen'],['entschied','entscheiden'],['entschieden','entscheiden'],
+  ['half','helfen'],['halfen','helfen'],['geholfen','helfen'],['hilfst','helfen'],['hilft','helfen'],
+  ['verstand','verstehen'],['verstanden','verstehen'],
+  ['begann','beginnen'],['begannen','beginnen'],['begonnen','beginnen'],
+  ['stieg','steigen'],['gestiegen','steigen'],['sank','sinken'],['gesunken','sinken'],
+  ['wuchs','wachsen'],['gewachsen','wachsen'],['waechst','wachsen'],
+]);
+const suffixes = ['ungsweise','ungsgemaess','ungen','ung','heiten','heit','keiten','keit','schaften','schaft','lichen','lichem','licher','liches','liche','lich','ischen','ischem','ischer','isches','ische','isch','enden','endem','ender','endes','ende','end','igsten','igster','igstem','igstes','igste','igst','ige','igen','igem','iger','iges','ig','test','tet','ten','te','sten','ster','stem','stes','ste','st','est','et','en','em','er','es','e','n','t'];
+function umlautBack(s) { return s.replace(/ae/g,'a').replace(/oe/g,'o').replace(/ue/g,'u').replace(/ss/g,'s'); }
+function checkStem(stem) { if (stem.length < 2) return false; if (wordSet.has(stem)) return true; const d = umlautBack(stem); return d !== stem && wordSet.has(d); }
+function isAllowed(rawWord) { const word = rawWord.toLowerCase(); if (!word) return false; const lemma = irregulars.get(word); if (lemma !== undefined) return wordSet.has(lemma); if (wordSet.has(word)) return true; for (const s of suffixes) { if (word.endsWith(s) && word.length - s.length >= 2) { if (checkStem(word.slice(0, -s.length))) return true; } } const d = umlautBack(word); return d !== word && wordSet.has(d); }
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function render() { const tokens = input.value.match(/[a-zA-ZaouAOUssäöüÄÖÜß]+|[^a-zA-ZäöüÄÖÜß]+/g) || []; let ok = 0, bad = 0, html = ''; for (const token of tokens) { if (/[a-zA-ZäöüÄÖÜß]/.test(token)) { if (isAllowed(token)) { ok++; html += '<mark class="ok">' + escapeHtml(token) + '</mark>'; } else { bad++; html += '<mark class="bad">' + escapeHtml(token) + '</mark>'; } } else { html += escapeHtml(token); } } backdrop.innerHTML = html + '\n'; backdrop.scrollTop = input.scrollTop; countOk.textContent = ok; countBad.textContent = bad; }
+input.addEventListener('input', render);
+input.addEventListener('scroll', () => { backdrop.scrollTop = input.scrollTop; });
+fetch('words.json').then(r => r.json()).then(words => { wordSet = new Set(words); render(); });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+===FILE: words.json===
+["der","die","das","dem","den","des","ein","eine","einem","einen","einer","eines","kein","keine","keinem","keinen","keiner","keines","dieser","diese","dieses","diesem","diesen","jeder","jede","jedes","jedem","jeden","alle","aller","alles","allem","allen","beide","beides","beiden","jener","jene","jenes","jenem","jenen","mancher","manche","manches","manchem","manchen","solcher","solche","solches","solchem","solchen","welcher","welche","welches","welchem","welchen","ich","du","er","sie","es","wir","ihr","mich","dich","ihn","uns","euch","mir","dir","ihm","sich","mein","dein","sein","unser","euer","meinen","meinem","meiner","meines","deinen","deinem","deiner","deines","seinen","seinem","seiner","seines","unseren","unserem","unserer","unseres","man","wer","wen","wem","wessen","was","jemand","niemand","etwas","nichts","alles","einer","eine","eins","in","auf","an","von","mit","zu","bei","nach","aus","über","unter","vor","hinter","neben","zwischen","durch","für","gegen","ohne","um","wegen","seit","bis","ab","außer","statt","trotz","während","innerhalb","außerhalb","gegenüber","entlang","gemäß","laut","zum","zur","beim","im","am","ans","aufs","ins","vom","und","oder","aber","denn","weil","dass","wenn","als","ob","damit","jedoch","sondern","obwohl","während","bevor","nachdem","seitdem","sobald","solange","falls","sofern","also","deshalb","daher","deswegen","trotzdem","dennoch","außerdem","zudem","einerseits","andererseits","zwar","sowohl","weder","noch","entweder","nicht","noch","auch","schon","nur","mehr","sehr","viel","wenig","ganz","immer","nie","niemals","oft","manchmal","selten","stets","heute","morgen","gestern","jetzt","dann","danach","davor","bald","hier","dort","da","hin","her","weg","zurück","weiter","zusammen","so","ja","nein","doch","wohl","mal","eigentlich","bitte","danke","fast","kaum","genug","bereits","erst","sogar","gar","wieder","zuerst","zuletzt","überhaupt","vielleicht","besonders","ziemlich","wirklich","einfach","richtig","gleich","allein","leider","natürlich","sicher","eben","nun","wo","wie","warum","wann","wohin","woher","wozu","womit","wobei","daran","dabei","dafür","dagegen","danach","darauf","daraus","darin","darüber","darunter","davon","davor","dazu","dazwischen","irgendwie","irgendwo","irgendwann","irgendwer","irgendwas","überall","nirgends","nirgendwo","oben","unten","links","rechts","vorne","hinten","innen","außen","rauf","runter","rein","raus","gerne","gern","lieber","null","eins","zwei","drei","vier","fünf","sechs","sieben","acht","neun","zehn","elf","zwölf","dreizehn","vierzehn","fünfzehn","sechzehn","siebzehn","achtzehn","neunzehn","zwanzig","dreißig","vierzig","fünfzig","sechzig","siebzig","achtzig","neunzig","hundert","tausend","million","milliarde","erste","zweite","dritte","vierte","fünfte","sechste","siebte","achte","neunte","zehnte","halb","hälfte","doppelt","dreifach","vierfach","paar","einige","mehrere","viele","wenige","sein","haben","werden","können","müssen","sollen","wollen","dürfen","mögen","möchten","machen","gehen","kommen","sagen","sehen","wissen","geben","nehmen","stehen","bringen","denken","liegen","lassen","stellen","zeigen","führen","sprechen","finden","bleiben","halten","heißen","leben","glauben","arbeiten","spielen","laufen","fahren","schreiben","lesen","kaufen","essen","trinken","schlafen","lernen","fragen","antworten","helfen","brauchen","suchen","kennen","meinen","erklären","verstehen","beginnen","enden","warten","passieren","verwenden","benutzen","nutzen","einsetzen","anwenden","öffnen","schließen","starten","aufhören","weitermachen","erzählen","berichten","beschreiben","nennen","benennen","entwickeln","bauen","erstellen","herstellen","produzieren","setzen","ändern","folgen","fallen","steigen","sinken","wachsen","versuchen","schaffen","erreichen","verlieren","gewinnen","hören","fühlen","interessieren","vergessen","erinnern","entscheiden","wählen","treffen","tragen","zählen","rechnen","messen","kochen","backen","waschen","aufräumen","bestellen","bezahlen","zahlen","kosten","sparen","verdienen","ausgeben","reisen","besuchen","ankommen","abfahren","landen","singen","tanzen","malen","zeichnen","fotografieren","funktionieren","klappen","passen","stimmen","gehören","legen","räumen","reden","rufen","schicken","empfangen","anrufen","löschen","speichern","laden","klicken","tippen","eingeben","auswählen","bestätigen","abbrechen","zurücksetzen","planen","organisieren","leiten","verwalten","kontrollieren","prüfen","testen","verbessern","reparieren","pflegen","liefern","verkaufen","anbieten","lösen","klären","bestimmen","definieren","bedeuten","vergleichen","unterscheiden","verbinden","trennen","sortieren","ordnen","aufteilen","kombinieren","mischen","sammeln","mitnehmen","holen","hängen","heben","schieben","ziehen","drücken","drehen","schützen","sichern","warnen","melden","informieren","mitteilen","empfehlen","vorschlagen","bitten","erlauben","verbieten","unterstützen","fördern","begleiten","einladen","begrüßen","danken","entschuldigen","loben","kritisieren","schwimmen","fliegen","klettern","wandern","rennen","springen","träumen","hoffen","wünschen","fürchten","sorgen","beobachten","bemerken","erkennen","begreifen","zuhören","lauschen","riechen","schmecken","tasten","lachen","weinen","lächeln","anfangen","weitergehen","unterbrechen","aufgeben","annehmen","ablehnen","zustimmen","widersprechen","ergänzen","hinzufügen","entfernen","streichen","teilen","weitergeben","erhalten","bekommen","vorstellen","präsentieren","demonstrieren","vorführen","einschalten","ausschalten","aktivieren","deaktivieren","sitzen","schlagen","werfen","fangen","stoßen","sperren","handeln","reagieren","agieren","interagieren","gelten","wirken","scheinen","senden","übertragen","bieten","benötigen","erfordern","verlangen","gelingen","misslingen","scheitern","erscheinen","verschwinden","auftauchen","entstehen","verändern","anpassen","überarbeiten","aktualisieren","steuern","regeln","lenken","überwachen","wiegen","schätzen","berechnen","auswerten","analysieren","ausprobieren","experimentieren","überprüfen","einführen","umsetzen","realisieren","beschleunigen","verlangsamen","steigern","reduzieren","fortsetzen","abschließen","beantworten","kommentieren","vorbereiten","tag","nacht","morgen","abend","mittag","nachmittag","mitternacht","woche","monat","jahr","stunde","minute","sekunde","zeit","dauer","moment","augenblick","weile","pause","datum","uhrzeit","frist","termin","zeitraum","periode","phase","beginn","anfang","mitte","ende","schluss","abschluss","mensch","mann","frau","kind","junge","mädchen","baby","jugendliche","person","leute","individuum","bevölkerung","freund","freundin","bekannte","kollege","kollegin","familie","mutter","vater","bruder","schwester","eltern","geschwister","opa","oma","onkel","tante","cousin","cousine","nichte","neffe","partner","partnerin","chef","chefin","mitarbeiter","mitarbeiterin","kunde","kundin","nachbar","nachbarin","gast","besucher","fremde","gruppe","team","gemeinschaft","gesellschaft","verein","haus","wohnung","zimmer","küche","bad","schlafzimmer","wohnzimmer","garten","balkon","terrasse","keller","dachboden","flur","eingang","straße","weg","platz","park","brücke","treppe","aufzug","ausgang","gebäude","schule","krankenhaus","supermarkt","laden","restaurant","bürogebäude","bahnhof","flughafen","hafen","parkplatz","tankstelle","kirche","rathaus","museum","theater","kino","bibliothek","schwimmbad","stadt","dorf","ort","gemeinde","bezirk","region","bundesland","land","staat","nation","hauptstadt","kontinent","welt","erde","universum","norden","süden","osten","westen","küste","wasser","brot","milch","fleisch","fisch","ei","eier","gemüse","obst","frucht","getränk","kaffee","tee","saft","wein","bier","suppe","salat","reis","nudel","nudeln","kartoffel","käse","butter","öl","zucker","salz","pfeffer","gewürz","kuchen","torte","schokolade","eis","arbeit","job","beruf","beschäftigung","stelle","position","aufgabe","projekt","pflicht","verantwortung","ziel","ergebnis","leistung","klasse","lehrer","lehrerin","schüler","schülerin","unterricht","fach","prüfung","hausaufgabe","note","universität","studium","student","studentin","professor","professorin","vorlesung","seminar","kurs","übung","büro","firma","unternehmen","betrieb","abteilung","branche","markt","buch","zeitung","zeitschrift","magazin","artikel","bericht","text","seite","kapitel","absatz","satz","wort","buchstabe","zeichen","bild","foto","grafik","tabelle","liste","diagramm","karte","film","video","serie","sendung","programm","kanal","podcast","musik","lied","melodie","rhythmus","instrument","band","konzert","album","sport","spiel","fußball","tennis","basketball","volleyball","hobby","freizeit","urlaub","reise","ausflug","abenteuer","auto","bus","bahn","zug","flugzeug","fahrrad","schiff","taxi","ubahn","geld","preis","kosten","euro","cent","betrag","rechnung","konto","kauf","verkauf","handel","wirtschaft","steuer","gehalt","lohn","bank","kredit","schulden","ersparnisse","budget","haushalt","frage","antwort","problem","lösung","idee","plan","konzept","strategie","erfolg","misserfolg","fehler","irrtum","fortschritt","chance","möglichkeit","risiko","gefahr","sicherheit","schutz","entscheidung","wahl","option","alternative","konsequenz","folge","ursache","grund","wirkung","effekt","einfluss","zusammenhang","tisch","stuhl","bett","sofa","schrank","regal","tür","fenster","wand","boden","decke","lampe","spiegel","vorhang","teppich","computer","laptop","telefon","handy","tablet","fernseher","radio","internet","netzwerk","app","software","datei","ordner","passwort","email","nachricht","chat","verbindung","daten","information","system","plattform","server","website","taste","bildschirm","tastatur","maus","kamera","drucker","körper","kopf","hand","fuß","herz","auge","ohr","mund","nase","arm","bein","finger","zeh","haar","hals","rücken","bauch","schulter","knochen","muskel","haut","blut","gehirn","organ","atem","farbe","form","größe","länge","breite","höhe","tiefe","gewicht","alter","nummer","zahl","punkt","grad","prozent","menge","anzahl","schritt","meter","kilometer","gramm","kilogramm","liter","stück","teil","baum","blume","pflanze","gras","blatt","ast","stamm","wurzel","zweig","wald","feld","wiese","berg","tal","fluss","see","meer","strand","insel","tier","hund","katze","vogel","insekt","pferd","kuh","schwein","schaf","ziege","huhn","maus","ratte","hase","fuchs","bär","wolf","luft","wind","regen","schnee","sonne","mond","stern","wolke","himmel","feuer","stein","holz","metall","glas","stoff","papier","plastik","wetter","temperatur","klima","umwelt","natur","energie","gesundheit","krankheit","schmerz","medizin","therapie","behandlung","arzt","ärztin","patient","patientin","apotheke","impfung","symptom","diagnose","operation","erholung","glück","freude","trauer","angst","wut","überraschung","ekel","scham","liebe","freundschaft","vertrauen","respekt","zufriedenheit","stolz","hoffnung","traum","wunsch","motivation","begeisterung","leidenschaft","stress","druck","entspannung","ruhe","stille","frieden","sprache","ausdruck","bedeutung","definition","erklärung","kommunikation","gespräch","diskussion","debatte","vortrag","rede","stimme","ton","klang","geräusch","lärm","name","titel","bezeichnung","abkürzung","symbol","ding","sache","gegenstand","objekt","inhalt","thema","beispiel","beschreibung","zusammenfassung","übersicht","unterschied","gemeinsamkeit","ähnlichkeit","vergleich","vorteil","nachteil","nutzen","schaden","wert","prozess","ablauf","methode","verfahren","technik","ansatz","situation","zustand","lage","fall","umstand","kontext","umgebung","erfahrung","wissen","fähigkeit","kompetenz","talent","recht","regel","gesetz","freiheit","typ","art","kategorie","bereich","sektor","mittel","werkzeug","hilfsmittel","ressource","material","beitrag","hilfe","unterstützung","zusammenarbeit","kooperation","resultat","qualität","standard","niveau","angebot","nachfrage","bedarf","bedürfnis","anforderung","struktur","aufbau","netzwerk","rolle","funktion","zweck","stil","design","format","vorlage","reihe","abfolge","sequenz","muster","modell","prinzip","gut","schlecht","groß","klein","lang","kurz","hoch","tief","breit","eng","dick","dünn","schwer","leicht","alt","neu","jung","modern","aktuell","schnell","langsam","stark","schwach","laut","leise","hell","dunkel","warm","kalt","heiß","kühl","schön","sauber","schmutzig","ordentlich","unordentlich","wichtig","unwichtig","nötig","unnötig","möglich","unmöglich","richtig","falsch","wahr","sicher","unsicher","klar","unklar","schwierig","kompliziert","verständlich","deutlich","voll","leer","offen","geschlossen","frei","besetzt","verfügbar","gleich","verschieden","ähnlich","anders","typisch","früh","spät","nah","fern","weit","toll","super","prima","normal","natürlich","echt","künstlich","arm","reich","teuer","billig","günstig","kostenlos","gratis","wertvoll","fleißig","faul","klug","dumm","nett","böse","freundlich","unfreundlich","höflich","ehrlich","fair","treu","zuverlässig","pünktlich","allgemein","besonder","individuell","persönlich","offiziell","privat","rund","eckig","flach","gerade","schief","steil","gesund","krank","lebendig","leblos","müde","fit","öffentlich","staatlich","global","national","international","regional","lokal","sozial","politisch","wirtschaftlich","kulturell","technisch","bereit","fertig","komplett","vollständig","unvollständig","teilweise","direkt","indirekt","automatisch","manuell","positiv","negativ","neutral","objektiv","subjektiv","kreativ","innovativ","traditionell","konservativ","fortschrittlich","praktisch","theoretisch","abstrakt","konkret","digital","analog","interessant","langweilig","spannend","aufregend","ruhig","entspannt","lustig","traurig","witzig","ernst","humorvoll","notwendig","überflüssig","nutzlos","nützlich","hilfreich","bekannt","unbekannt","beliebt","populär","häufig","selten","regelmäßig","gelegentlich","zufällig","absichtlich","aktiv","passiv","proaktiv","engagiert","riesig","winzig","durchschnittlich","schlimm","furchtbar","komplex","vielfältig","einheitlich","einzigartig","ok","okay","hallo","tschüss","entschuldigung","genau","stimmt","aha","oh","hmm","tja","na"]
+
+===FILE: manifest.json===
+{"name":"Thing Explainer","short_name":"ThingExp","description":"Erklaere Begriffe mit den 1000 haeufigsten deutschen Woertern","start_url":"./","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","lang":"de","icons":[{"src":"icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"icon-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}
+
+===FILE: sw.js===
+const CACHE='thing-explainer-v1';const ASSETS=['./','.\/index.html','./style.css','./script.js','./words.json','./manifest.json'];self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request))));
+
+===FILE: requirements.md===
+# Thing Explainer - Anforderungen
+
+## 1. Projektuebersicht
+Thing Explainer ist eine mobile-first PWA inspiriert von Randall Munroes Buch Thing Explainer. Spielende erklaeren Begriffe ausschliesslich mit den 1000 haeufigsten deutschen Woertern. Die App prueft den Text in Echtzeit.
+
+## 2. Workshop-Spielablauf
+1. Moderator nennt einen Begriff verbal
+2. Erklaerende Person oeffnet die App auf dem Smartphone
+3. Sie tippt die Erklaerung in das Textfeld
+4. Die App markiert jedes Wort sofort: gruen = erlaubt, rot = nicht erlaubt
+5. Andere Spielende hoeren zu und raten den Begriff verbal
+6. Kein digitaler Sync zwischen den Geraeten noetig
+
+## 3. Funktionale Anforderungen
+- Jedes Wort wird beim Tippen in Echtzeit geprueft
+- Flektierte Formen zaehlen als erlaubt wenn ihre Grundform in der Liste steht
+- Komposita werden nicht automatisch aufgeteilt
+- Echtzeit-Zaehler: n erlaubt / m verboten
+- Morphologie via Suffix-Stripping, Umlaut-Normalisierung, Irregulae-Tabelle
+- Keine externe NLP-Bibliothek
+
+## 4. Nicht-funktionale Anforderungen
+- Web/PWA, laeuft in jedem modernen Mobilbrowser
+- Offline nach erstem Laden (Service Worker)
+- Vollstaendig statisch, FTP-deploybar
+- Vanilla JS, keine Frameworks
+
+## 5. Nicht im Scope v1
+Multiplayer, Sync, Timer, Punkte, KI-Pruefung, Mehrsprachigkeit, Komposita-Zerlegung
+
+===FILE: CLAUDE.md===
+# CLAUDE.md
+
+Thing Explainer ist eine statische PWA (kein Backend, FTP-deploybar). Alle Anforderungen in requirements.md.
+
+Tech-Stack: Vanilla JS ES6+, HTML5, CSS3. Keine Frameworks, keine Build-Tools. Daten: words.json (flaches Array von deutschen Lemma-Strings).
+
+Entwicklung: python3 -m http.server dann http://localhost:8000
+
+Testen: Manuell im Browser: gruen/rot-Markierung in Echtzeit, Zaehler, Offline-Funktion, Mobile-Layout.
+
+Deployment: FTP-Upload: index.html, style.css, script.js, words.json, manifest.json, sw.js
+
+Wortliste erweitern: words.json ist ein einfaches JSON-Array. Neue Lemmas lowercase hinzufuegen. Die isAllowed-Funktion in script.js uebernimmt Flexionsformen automatisch.
